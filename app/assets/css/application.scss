@@ -1,0 +1,34 @@
+@import "~bootstrap/scss/bootstrap.scss";
+@import "~@fortawesome/fontawesome-free/css/all.min.css";
+
+// This is just some CSS for the welcome home landing page, feel free to 
+// remove it.
+body{
+    background-color: #EFF1F2;
+}
+a:hover{
+    text-decoration: none;
+}
+
+.color-one{
+    background-color: #73C2DA;
+}
+.color-two{
+    background-color: #1D4564;
+}
+
+.text-task{
+    color: #73C2DA;
+    font-weight: bold;
+}
+.text-task,#check-input,#edit,#remove:hover{
+    cursor: pointer;
+}
+.grid-form{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+}
+
+
+

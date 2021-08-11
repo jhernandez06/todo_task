@@ -1,0 +1,77 @@
+<nav class="nav color-one pt-4 pb-3">
+    <div class="container w-50 d-flex">
+      <h1 class="text-light h2 px-3 my-auto mr-4">ToDo List</h1>
+      <div
+        class="h-75 my-auto px-4 b-left d-flex flex-column justify-content-center"
+      >
+        <div>
+          <p class="text-light my-auto">
+            <span><%= ntasks %></span> Incompleted Tasks
+          </p>
+        </div>
+        <div><p class="text-light my-0">Fecha</p></div>
+      </div>
+    </div>
+    <div class="container w-50 d-flex justify-content-end">
+      <a class="nav-link text-light my-auto" href="#"
+        ><p class="  text-white py-2 fw-lighter"><a href="/" class="text-white">Incomplete Tasks</a></p>
+      </a>
+      <a class="nav-link text-light my-auto" href="#"
+        ><p class="py-2">Completed Tasks</p></a
+      >
+    </div>
+  </nav>
+  
+  <section id="tasks" class="container px-5 mx-auto">
+    <div class="d-flex justify-content-end py-4">
+      <button id="add-task" type="button" class="btn color-one">
+        <span class="py-2 px-4"><a href="/tasks/new">Add Task</a></span>
+      </button>
+    </div>
+    <div>
+      <table class="table">
+        <thead class="table color-two">
+          <tr class="text-light">
+            <th scope="col "></th>
+            <th scope="col" colspan="2">Task</th>
+            <th scope="col">Complete by</th>
+            <th class="" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <%= for (task) in tasks { %>
+              <%= if (task.CheckComplet == true) { %>
+          <tr>
+            <th scope="row">
+              <div class="form-check text-center">
+                <%= form_for(task, {action: "/tasks/new-task", method: "POST",
+                class: "form"}) { %> <%= f.CheckboxTag("") %> <% } %>
+              </div>
+            </th>
+            <td colspan="2">
+              <span>
+                <a class="text-task" href="/tasks/show/<%= task.ID %>"><%= task.Title %></a></span
+              >
+            </td>
+            <td><%= task.LimitData %></td>
+            <td>
+              <a href="/tasks/edit/<%= task.ID %>"
+                ><i id="edit" class="fas fa-pencil-alt mr-3 fa-lg"></i
+              ></a>
+              <a
+                data-method="DELETE"
+                data-confirm="Are you sure you want to remove this task?"
+                href="/tasks/delete/<%= task.ID %>"
+              >
+                <i id="destroy" class="far fa-trash-alt text-danger fa-lg"></i>
+              </a>
+            </td>
+           
+          </tr>
+          <% } %>
+      <% } %>
+         
+        </tbody>
+      </table>
+    </div>
+  </section>
