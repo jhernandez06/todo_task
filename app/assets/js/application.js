@@ -39,7 +39,7 @@ $(() => {
     };
     currentDate();
 
-    $("body").on("click",'#callDelete' ,function() {
+    $("body").on("click",'.delete' ,function() {
         let r = '<a href="/tasks/delete/'+$(this).attr('data-id')+'" data-method="DELETE" ><button type="button" class="btn btn-primary">Delete</button></a>';
         document.getElementById('deleteTask').innerHTML = r;
      });
