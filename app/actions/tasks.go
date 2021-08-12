@@ -11,9 +11,17 @@ import (
 func TasksList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 
+	status := c.Param("check_complet")
+
+	q := tx.Q()
+
+	if status != "" {
+		q.Where("check_complet = ?", status)
+	}
+
 	tasks := models.Tasks{}
 
-	if err := tx.All(&tasks); err != nil {
+	if err := q.All(&tasks); err != nil {
 		return err
 	}
 	c.Set("ntasks", len(tasks))
@@ -46,7 +54,7 @@ func CreateTask(c buffalo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.Redirect(http.StatusSeeOther, "/tasks?check_complet=false")
 }
 
 func ShowTask(c buffalo.Context) error {
@@ -75,7 +83,7 @@ func EditTask(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.HTML("todo-tasks/edit-task.plush.html"))
 }
 
-//PENDIENTE
+//Update task
 func UpdateTask(c buffalo.Context) error {
 
 	tx := c.Value("tx").(*pop.Connection)
@@ -99,8 +107,7 @@ func UpdateTask(c buffalo.Context) error {
 	if err := tx.Update(&task); err != nil {
 		return err
 	}
-	//return c.Redirect(http.StatusSeeOther, "taskUpdatePath()", render.Data{"task_id": task.ID})
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.Redirect(http.StatusSeeOther, "/tasks?check_complet=false")
 }
 
 //delete
@@ -118,10 +125,35 @@ func DestroyTask(c buffalo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.Redirect(http.StatusSeeOther, "/tasks?check_complet=false")
+
 }
 
-// tasks completed
-func TasksCompleted(c buffalo.Context) error {
-	return c.Render(http.StatusOK, r.HTML("todo-tasks-complet/index.plush.html"))
+// CheckComplet
+func UpdateTaskCheck(c buffalo.Context) error {
+
+	tx := c.Value("tx").(*pop.Connection)
+	task := models.Task{}
+	taskID := c.Param("task_id")
+
+	if err := tx.Find(&task, taskID); err != nil {
+		return err
+	}
+
+	if err := c.Bind(&task); err != nil {
+		return err
+	}
+
+	var currentPath string
+	if task.CheckComplet == false {
+		task.CheckComplet = true
+		currentPath = "/tasks?check_complet=false"
+	} else if task.CheckComplet == true {
+		task.CheckComplet = false
+		currentPath = "/tasks?check_complet=true"
+	}
+	if err := tx.Update(&task); err != nil {
+		return err
+	}
+	return c.Redirect(http.StatusSeeOther, currentPath)
 }

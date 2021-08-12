@@ -13,6 +13,9 @@ a:hover{
 .color-one{
     background-color: #73C2DA;
 }
+.color-one-text{
+    color:#73C2DA ;
+}
 .color-two{
     background-color: #1D4564;
 }
@@ -20,6 +23,7 @@ a:hover{
 .text-task{
     color: #73C2DA;
     font-weight: bold;
+    text-align: center;
 }
 .text-task,#check-input,#edit,#remove:hover{
     cursor: pointer;
@@ -28,6 +32,19 @@ a:hover{
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 20px;
+}
+.b-left{
+    border-left: #EFF1F2 solid 1px;
+}
+.delete:hover{
+    cursor: pointer;
+    color: green;
+}
+#update-task:hover,#new-task:hover{
+    background-color: #4594ac;
+}
+.container-addTask{
+    height: 86.6px;
 }
 
 

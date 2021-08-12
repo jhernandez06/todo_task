@@ -2,6 +2,7 @@ package render
 
 import (
 	base "TodoList"
+	"time"
 
 	"github.com/gobuffalo/buffalo/render"
 )
@@ -16,11 +17,17 @@ var Engine = render.New(render.Options{
 	Helpers:      Helpers,
 })
 
-// Helpers available for the plush templates, there are 
-// some helpers that are injected by Buffalo but this is 
+// Helpers available for the plush templates, there are
+// some helpers that are injected by Buffalo but this is
 // the list of custom Helpers.
 var Helpers = map[string]interface{}{
 	// partialFeeder is the helper used by the render engine
 	// to find the partials that will be used, this is important
 	"partialFeeder": base.Templates.FindString,
+	"FormatDate":    FormatDate,
+}
+
+func FormatDate(t time.Time) string {
+	date := t.Format("02 Jan 2006")
+	return date
 }

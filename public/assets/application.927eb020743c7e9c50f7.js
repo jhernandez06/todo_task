@@ -23,9 +23,10 @@ eval("/*!\n * Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com
 /*!**************************************!*\
   !*** ./app/assets/js/application.js ***!
   \**************************************/
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("/* provided dependency */ var $ = __webpack_require__(/*! jquery */ \"./node_modules/jquery/dist/jquery-exposed.js\");\n__webpack_require__(/*! expose-loader?exposes=$,jQuery!jquery */ \"./node_modules/expose-loader/dist/cjs.js?exposes=$,jQuery!./node_modules/jquery/dist/jquery-exposed-exposed.js\");\n\n__webpack_require__(/*! bootstrap/dist/js/bootstrap.bundle.js */ \"./node_modules/bootstrap/dist/js/bootstrap.bundle.js\");\n\n__webpack_require__(/*! @fortawesome/fontawesome-free/js/all.js */ \"./node_modules/@fortawesome/fontawesome-free/js/all.js\");\n\n$(function () {\n  /* $('#add-task').on('click', function(){\n       $('#tasks').addClass('d-none');\n       $('#new-task').removeClass('d-none')\n   })\n    $('#cancel').on('click', function(){\n       $('#tasks').removeClass('d-none')\n       $('#new-task').addClass('d-none');\n   })\n    $('#create-task').on('click', function(){\n       $('#tasks').removeClass('d-none')\n       $('#new-task').addClass('d-none');\n       alert(\"New Task Create\")\n   })\n   */\n});\n\n//# sourceURL=webpack://TodoList/./app/assets/js/application.js?");
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var expose_loader_exposes_$_jQuery_jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! expose-loader?exposes=$,jQuery!jquery */ \"./node_modules/expose-loader/dist/cjs.js?exposes=$,jQuery!./node_modules/jquery/dist/jquery-exposed-exposed.js\");\n/* harmony import */ var expose_loader_exposes_$_jQuery_jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(expose_loader_exposes_$_jQuery_jquery__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var bootstrap_dist_js_bootstrap_bundle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! bootstrap/dist/js/bootstrap.bundle.js */ \"./node_modules/bootstrap/dist/js/bootstrap.bundle.js\");\n/* harmony import */ var bootstrap_dist_js_bootstrap_bundle_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(bootstrap_dist_js_bootstrap_bundle_js__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _fortawesome_fontawesome_free_js_all_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @fortawesome/fontawesome-free/js/all.js */ \"./node_modules/@fortawesome/fontawesome-free/js/all.js\");\n/* harmony import */ var _fortawesome_fontawesome_free_js_all_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_fortawesome_fontawesome_free_js_all_js__WEBPACK_IMPORTED_MODULE_2__);\n/* provided dependency */ var $ = __webpack_require__(/*! jquery */ \"./node_modules/jquery/dist/jquery-exposed.js\");\n\n\n\n$(function () {\n  var Url = $(location).attr('href');\n  var incomplete = \"http://localhost:3000/tasks?check_complet=false\";\n  var completed = \"http://localhost:3000/tasks?check_complet=true\";\n  var taskAll = \"http://localhost:3000/tasks\";\n\n  if (Url == incomplete || Url == taskAll) {\n    $('#add-task').removeClass('d-none');\n  }\n\n  if (Url == completed) {\n    $('#incomplete').addClass('font-weight-lighter');\n  } else if (Url == incomplete) {\n    $('#completed').addClass('font-weight-lighter');\n  } else {\n    $('#completed').addClass('font-weight-lighter');\n    $('#incomplete').addClass('font-weight-lighter');\n  }\n\n  ;\n\n  function currentDate() {\n    var week = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n    var month = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"];\n    var d = new Date();\n    var dayWeek = week[d.getDay()];\n    var dayMonth = d.getDate();\n    var Month = month[d.getMonth() + 1];\n    var year = d.getFullYear();\n    document.getElementById(\"date\").innerHTML = \"\".concat(dayWeek, \" \").concat(dayMonth, \" , \").concat(Month, \" \").concat(year);\n  }\n\n  ;\n  currentDate();\n  $(\"body\").on(\"click\", '#callDelete', function () {\n    var r = '<a href=\"/tasks/delete/' + $(this).attr('data-id') + '\" data-method=\"DELETE\" ><button type=\"button\" class=\"btn btn-primary\">Delete</button></a>';\n    document.getElementById('deleteTask').innerHTML = r;\n  });\n});\n\n//# sourceURL=webpack://TodoList/./app/assets/js/application.js?");
 
 /***/ }),
 
@@ -138,6 +139,30 @@ eval("__webpack_require__.r(__webpack_exports__);\n// extracted by mini-css-extr
 /******/ 	};
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -150,12 +175,17 @@ eval("__webpack_require__.r(__webpack_exports__);\n// extracted by mini-css-extr
 /******/ 		})();
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/livereload */
 /******/ 	(() => {
 /******/ 		// livereload-webpack-plugin
 /******/ 		(function() {
 /******/ 		  if (typeof window === "undefined") { return };
-/******/ 		  var id = "livereload-webpack-plugin-script-d45e57f2cb25f135";
+/******/ 		  var id = "livereload-webpack-plugin-script-5f6c5a9996ec29c9";
 /******/ 		  if (document.getElementById(id)) { return; }
 /******/ 		  var el = document.createElement("script");
 /******/ 		  el.id = id;

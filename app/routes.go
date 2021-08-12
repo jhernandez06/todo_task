@@ -15,7 +15,7 @@ func setRoutes(root *buffalo.App) {
 	root.Use(middleware.CSRF)
 
 	//root.GET("/", home.Index)
-	root.GET("/", actions.TasksList)
+	root.GET("/tasks", actions.TasksList)
 
 	root.GET("/tasks/new", actions.NewTask)
 	root.POST("/tasks/create", actions.CreateTask)
@@ -23,8 +23,6 @@ func setRoutes(root *buffalo.App) {
 	root.GET("/tasks/edit/{task_id}", actions.EditTask)
 	root.PUT("/tasks/update/{task_id}", actions.UpdateTask)
 	root.GET("/tasks/delete/{task_id}", actions.DestroyTask)
-
-	root.GET("/tasks/completed", actions.TasksCompleted)
-
+	root.PUT("/tasks/updateCheck/{task_id}", actions.UpdateTaskCheck)
 	root.ServeFiles("/", base.Assets)
 }

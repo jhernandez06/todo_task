@@ -1,4 +1,33 @@
-<!--<%= partial("partials/new-task.plush.html") %>-->
+<nav class="nav color-one pt-4 pb-3">
+    <div class="container w-50 d-flex">
+      <h1 class="text-light h1 px-3 mr-4">
+        <a class="text-white" href="/tasks?check_complet=false">ToDo List</a>
+      </h1>
+      <div
+        class="h-75 my-auto px-4 b-left d-flex flex-column justify-content-center"
+      >
+        <div>
+          <p class="text-light my-auto">
+            Tasks
+          </p>
+        </div>
+        <div>
+          <p class="mb-0 py-0 text-white" id="date"></p>
+        </div>
+      </div>
+    </div>
+    <div class="container w-50 d-flex justify-content-end">
+      <a class="nav-link text-light font-weight-lighter" href="/tasks?check_complet=false"
+        >Incomplete Tasks
+      </a>
+      <a
+        class="nav-link text-light font-weight-lighter"
+        href="/tasks?check_complet=true"
+        >Completed Tasks</a
+      >
+    </div>
+  </nav>
+
 <section id="new-task" class="container px-5 w-75 bg-white mt-5 p-5 ">
     <h3 class="fw-bolder mb-3">New Task</h3>
 <%= form_for(task, {action: "/tasks/create", method: "POST", class: "form"}) { %>
@@ -11,8 +40,8 @@
     <%= f.TextArea("Description") %>
     <!-- <%= f.CheckboxTag("CheckComplete") %> -->
     <div class="mt-4 d-flex justify-content-end">
-        <button id="cancel" class="btn btn-light py-2 px-3 mx-3" type="button"><a href="/">Cancel</a></button>
-        <input id="create-task" class="btn color-one py-2 px-3" type="submit" value="Create Task"></input>
+        <a href="/tasks?check_complet=false"> <button id="cancel" class="btn btn-light py-2 px-3 mx-3 text-dark" type="button">Cancel</button></a>
+        <button data-method="PUT" data-confirm="Are you sure you want to update this task?" id="new-task" class="btn color-one py-2 px-3 text-white" type="submit">Create Task</button>
       </div>
 <% } %>
 </section>
