@@ -2,7 +2,6 @@ package render
 
 import (
 	base "TodoList"
-	"time"
 
 	"github.com/gobuffalo/buffalo/render"
 )
@@ -25,9 +24,43 @@ var Helpers = map[string]interface{}{
 	// to find the partials that will be used, this is important
 	"partialFeeder": base.Templates.FindString,
 	"FormatDate":    FormatDate,
+	"Icon":          Icon,
+	"status":        CheckStatus,
+	//"incomplet":     Incomplet,
+	"addTask": AddTask,
 }
 
-func FormatDate(t time.Time) string {
-	date := t.Format("02 Jan 2006")
-	return date
+func FormatDate(t bool) string {
+	var status string
+	if t {
+		status = "Was completed on "
+	} else {
+		status = "needs to be completed on "
+	}
+	return status
+}
+func Icon(k string) string {
+	var icon string
+	if k == "info" {
+		icon = "#info-fill"
+	} else if k == "danger" {
+		icon = "#exclamation-triangle-fill"
+	} else if k == "success" {
+		icon = "#check-circle-fill"
+	}
+	return icon
+}
+func CheckStatus(x string, y string) string {
+
+	if x == y {
+		y = "font-weight-lighter"
+	}
+	return y
+}
+func AddTask(x string) string {
+	var y string
+	if x == "true" {
+		y = "d-none"
+	}
+	return y
 }

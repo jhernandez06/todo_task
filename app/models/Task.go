@@ -41,7 +41,7 @@ func (t Tasks) String() string {
 func (t *Task) Validate() *validate.Errors {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: t.Title, Name: "Title"},
-		&validators.TimeIsPresent{Field: t.LimitData, Name: "LimitData"},
+		&validators.TimeIsPresent{Field: t.LimitData, Name: "Limit Data"},
 		&validators.StringIsPresent{Field: t.Description, Name: "Description"},
 	)
 }

@@ -21,17 +21,17 @@ func TasksList(c buffalo.Context) error {
 
 	tasks := models.Tasks{}
 
-	if err := q.All(&tasks); err != nil {
+	if err := q.Order("limit_data asc").All(&tasks); err != nil {
 		return err
 	}
-	c.Set("ntasks", len(tasks))
+
 	c.Set("tasks", tasks)
-	return c.Render(http.StatusOK, r.HTML("todo-tasks/index.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("task/index.plush.html"))
 }
 
 func NewTask(c buffalo.Context) error {
 	c.Set("task", models.Task{})
-	return c.Render(http.StatusOK, r.HTML("todo-tasks/new-task.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
 }
 
 func CreateTask(c buffalo.Context) error {
@@ -47,14 +47,14 @@ func CreateTask(c buffalo.Context) error {
 		c.Set("errors", verrs)
 		c.Set("task", task)
 
-		return c.Render(http.StatusOK, r.HTML("todo-tasks/new-task.plush.html"))
+		return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
 	}
 
 	if err := tx.Create(&task); err != nil {
 		return err
 	}
-
-	return c.Redirect(http.StatusSeeOther, "/tasks?check_complet=false")
+	c.Flash().Add("success", "task created success")
+	return c.Redirect(http.StatusSeeOther, "/")
 }
 
 func ShowTask(c buffalo.Context) error {
@@ -63,11 +63,12 @@ func ShowTask(c buffalo.Context) error {
 	taskID := c.Param("task_id")
 
 	if err := tx.Find(&task, taskID); err != nil {
-		return err
+		c.Flash().Add("danger", "a task with that ID was not found")
+		return c.Redirect(302, "/")
 	}
 
 	c.Set("task", task)
-	return c.Render(http.StatusOK, r.HTML("todo-tasks/show-task.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("task/show.plush.html"))
 }
 
 func EditTask(c buffalo.Context) error {
@@ -76,11 +77,12 @@ func EditTask(c buffalo.Context) error {
 	taskID := c.Param("task_id")
 
 	if err := tx.Find(&task, taskID); err != nil {
-		return err
+		c.Flash().Add("danger", "a task with that ID was not found")
+		c.Redirect(http.StatusSeeOther, "/")
 	}
 
 	c.Set("task", task)
-	return c.Render(http.StatusOK, r.HTML("todo-tasks/edit-task.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("task/edit.plush.html"))
 }
 
 //Update task
@@ -91,7 +93,8 @@ func UpdateTask(c buffalo.Context) error {
 	taskID := c.Param("task_id")
 
 	if err := tx.Find(&task, taskID); err != nil {
-		return err
+		c.Flash().Add("danger", "a task with that ID was not found")
+		return c.Redirect(302, "/")
 	}
 
 	if err := c.Bind(&task); err != nil {
@@ -102,12 +105,19 @@ func UpdateTask(c buffalo.Context) error {
 		c.Set("errors", verrs)
 		c.Set("task", task)
 
-		return c.Render(http.StatusOK, r.HTML("todo-tasks/edit-task.plush.html"))
+		return c.Render(http.StatusOK, r.HTML("task/edit.plush.html"))
 	}
 	if err := tx.Update(&task); err != nil {
 		return err
 	}
-	return c.Redirect(http.StatusSeeOther, "/tasks?check_complet=false")
+	if task.CheckComplet {
+		c.Flash().Add("danger", "cannot update a completed task")
+		return c.Redirect(404, "/")
+	}
+	c.Flash().Add("success", "task updated success")
+
+	return c.Redirect(http.StatusSeeOther, "/")
+
 }
 
 //delete
@@ -119,13 +129,15 @@ func DestroyTask(c buffalo.Context) error {
 	taskID := c.Param("task_id")
 
 	if err := tx.Find(&task, taskID); err != nil {
-		return err
+		c.Flash().Add("danger", "no task found with that ID")
+		return c.Redirect(http.StatusSeeOther, "/")
 	}
 	if err := tx.Destroy(&task); err != nil {
 		return err
 	}
+	c.Flash().Add("success", "task destroyed success")
 
-	return c.Redirect(http.StatusSeeOther, "/tasks?check_complet=false")
+	return c.Redirect(http.StatusSeeOther, "/")
 
 }
 
@@ -144,16 +156,16 @@ func UpdateTaskCheck(c buffalo.Context) error {
 		return err
 	}
 
-	var currentPath string
-	if task.CheckComplet == false {
+	if !(task.CheckComplet) {
 		task.CheckComplet = true
-		currentPath = "/tasks?check_complet=false"
-	} else if task.CheckComplet == true {
+		c.Flash().Add("info", "task completed success, Congratulations")
+	} else if task.CheckComplet {
 		task.CheckComplet = false
-		currentPath = "/tasks?check_complet=true"
+		c.Flash().Add("info", "the task returned to incomplete tasks")
 	}
 	if err := tx.Update(&task); err != nil {
 		return err
 	}
-	return c.Redirect(http.StatusSeeOther, currentPath)
+
+	return c.Redirect(http.StatusSeeOther, "/")
 }
