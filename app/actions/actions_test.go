@@ -13,11 +13,8 @@ type ActionSuite struct {
 
 func Test_ActionSuite(t *testing.T) {
 	bapp := app.New()
-	/*if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}*/
 
 	as := &ActionSuite{suite.NewAction(bapp)}
 	suite.Run(t, as)
+
 }

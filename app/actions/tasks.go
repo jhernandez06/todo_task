@@ -55,6 +55,7 @@ func CreateTask(c buffalo.Context) error {
 	}
 	c.Flash().Add("success", "task created success")
 	return c.Redirect(http.StatusSeeOther, "/")
+
 }
 
 func ShowTask(c buffalo.Context) error {
@@ -64,7 +65,7 @@ func ShowTask(c buffalo.Context) error {
 
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
-		return c.Redirect(302, "/")
+		return c.Redirect(404, "/")
 	}
 
 	c.Set("task", task)
@@ -94,7 +95,7 @@ func UpdateTask(c buffalo.Context) error {
 
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
-		return c.Redirect(302, "/")
+		return c.Redirect(404, "/")
 	}
 
 	if err := c.Bind(&task); err != nil {
