@@ -23,14 +23,14 @@ var Helpers = map[string]interface{}{
 	// partialFeeder is the helper used by the render engine
 	// to find the partials that will be used, this is important
 	"partialFeeder": base.Templates.FindString,
-	"FormatDate":    FormatDate,
+	"FormatDate":    Status,
 	"Icon":          Icon,
 	"status":        CheckStatus,
 	//"incomplet":     Incomplet,
 	"addTask": AddTask,
 }
 
-func FormatDate(t bool) string {
+func Status(t bool) string {
 	var status string
 	if t {
 		status = "Was completed on "
@@ -51,7 +51,6 @@ func Icon(k string) string {
 	return icon
 }
 func CheckStatus(x string, y string) string {
-
 	if x == y {
 		y = "font-weight-lighter"
 	}

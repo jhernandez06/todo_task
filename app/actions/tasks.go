@@ -8,6 +8,7 @@ import (
 	"github.com/gobuffalo/pop/v5"
 )
 
+// Show List
 func TasksList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 
@@ -15,7 +16,7 @@ func TasksList(c buffalo.Context) error {
 
 	q := tx.Q()
 
-	if status != "" {
+	if status == "true" || status == "false" {
 		q.Where("check_complet = ?", status)
 	}
 
@@ -29,6 +30,7 @@ func TasksList(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.HTML("task/index.plush.html"))
 }
 
+// New task
 func NewTask(c buffalo.Context) error {
 	c.Set("task", models.Task{})
 	return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
@@ -65,7 +67,7 @@ func ShowTask(c buffalo.Context) error {
 
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
-		return c.Redirect(404, "/")
+		return c.Redirect(http.StatusNotFound, "/")
 	}
 
 	c.Set("task", task)
@@ -79,7 +81,7 @@ func EditTask(c buffalo.Context) error {
 
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
-		c.Redirect(http.StatusSeeOther, "/")
+		return c.Redirect(http.StatusNotFound, "/")
 	}
 
 	c.Set("task", task)
@@ -106,14 +108,10 @@ func UpdateTask(c buffalo.Context) error {
 		c.Set("errors", verrs)
 		c.Set("task", task)
 
-		return c.Render(http.StatusOK, r.HTML("task/edit.plush.html"))
+		return c.Render(http.StatusSeeOther, r.HTML("task/edit.plush.html"))
 	}
 	if err := tx.Update(&task); err != nil {
 		return err
-	}
-	if task.CheckComplet {
-		c.Flash().Add("danger", "cannot update a completed task")
-		return c.Redirect(404, "/")
 	}
 	c.Flash().Add("success", "task updated success")
 
@@ -131,7 +129,7 @@ func DestroyTask(c buffalo.Context) error {
 
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "no task found with that ID")
-		return c.Redirect(http.StatusSeeOther, "/")
+		return c.Redirect(404, "/")
 	}
 	if err := tx.Destroy(&task); err != nil {
 		return err
