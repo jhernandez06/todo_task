@@ -4,13 +4,13 @@
 <%= form_for(task, {action: updateTaskIDPath({task_id: task.ID}), method: "PUT", class: "form"}) { %>
     <div class="mb-3 grid-form">
         <%= f.InputTag("Title") %>
-        <%= f.InputTag("LimitData", {type: "datetime-local", min: "2021-01-02T00:00"}) %> 
+        <%= f.InputTag("LimitData", {type: "datetime-local", min: "2021-01-02T00:00", value: task.LimitData.Format("2006-01-02T15:04") }) %> 
     </div>
     <%= f.TextArea("Description") %>
-   
+    <%= f.SelectTag("UserID", {options: usersList }) %>
     <div class="mt-4 d-flex justify-content-end">
         <a href="/?check_complet=false"> <button id="cancel" class="btn btn-light py-2 px-3 mx-3 text-dark" type="button">Cancel</button></a>
-        <button data-method="PUT" data-confirm="Are you sure you want to update this task?" id="update-task" class="btn color-one py-2 px-3 text-white" type="submit">Update Task</button>
+        <button data-method="PUT" data-confirm="Are you sure you want to update this task?" id="update-task" class="btn color-one py-2 px-3 text-white" type="submit">Edit Task</button>
       </div>
 <% } %>
 </section>

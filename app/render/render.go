@@ -2,8 +2,11 @@ package render
 
 import (
 	base "TodoList"
+	"fmt"
+	"time"
 
 	"github.com/gobuffalo/buffalo/render"
+	"github.com/gofrs/uuid"
 )
 
 // Engine for rendering across the app, it provides
@@ -26,16 +29,22 @@ var Helpers = map[string]interface{}{
 	"FormatDate":    Status,
 	"Icon":          Icon,
 	"status":        CheckStatus,
-	//"incomplet":     Incomplet,
-	"addTask": AddTask,
+	"addTask":       AddTask,
+	"byCompleted":   Completed,
+	"idUser":        IdUser,
 }
 
-func Status(t bool) string {
+func Status(completed bool, date time.Time, dateUpdate time.Time) string {
 	var status string
-	if t {
-		status = "Was completed on "
+	dateCurrent := time.Now()
+	if completed {
+		status = fmt.Sprintf("Was completed on %v", dateUpdate.Format("Monday 02, Jan 2006 at 15:04"))
 	} else {
-		status = "needs to be completed on "
+		if dateCurrent.After(date) {
+			status = fmt.Sprintf("was to be completed on %v", date.Format("Monday 02, Jan 2006 at 15:04"))
+		} else {
+			status = fmt.Sprintf("needs to be completed on %v", date.Format("Monday 02, Jan 2006 at 15:04"))
+		}
 	}
 	return status
 }
@@ -62,4 +71,17 @@ func AddTask(x string) string {
 		y = "d-none"
 	}
 	return y
+}
+func Completed(x string) string {
+	var y string
+	if x == "true" {
+		y = "d"
+	}
+	return y
+}
+
+//FALTAN TEST
+func IdUser(a string) uuid.UUID {
+	s, _ := uuid.FromString(a)
+	return s
 }

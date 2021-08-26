@@ -1,9 +1,8 @@
 <%= partial("partials/navbar.plush.html") %>
-
 <div class="jumbotron mt-5 container w-75">
     <h1 class="display-4 title-task"><%= task.Title %></h1>
     <div class="d-flex justify-content-end">
-        <p class="lead text-muted"> <%= FormatDate(task.CheckComplet) %> <%= Date %></p>
+        <p class="lead text-muted"> <%= FormatDate(task.CheckComplet,task.LimitData,task.UpdatedAt) %> </p>
     </div>
     <p class="lead"><%= task.Description %></p>
     <hr class="my-4">

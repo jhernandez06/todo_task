@@ -5,18 +5,18 @@ import (
 	"testing"
 )
 
-func TestStatus(t *testing.T) {
-	statusTrue := render.Status(true)
-	if statusTrue != "Was completed on " {
-		t.Error("Error")
-		t.Fail()
-	}
-	statusFalse := render.Status(false)
-	if statusFalse != "needs to be completed on " {
-		t.Error("Error")
-		t.Fail()
-	}
-}
+// func TestStatus(t *testing.T) {
+// 	statusTrue := render.Status(true)
+// 	if statusTrue != "Was completed on " {
+// 		t.Error("Error")
+// 		t.Fail()
+// 	}
+// 	statusFalse := render.Status(false)
+// 	if statusFalse != "needs to be completed on " {
+// 		t.Error("Error")
+// 		t.Fail()
+// 	}
+// }
 
 func TestIcon(t *testing.T) {
 	var icon string

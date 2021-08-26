@@ -2,12 +2,18 @@
 <%= partial("partials/flash.plush.html") %>
 <section id="tasks" class="container px-5 mx-auto">
   
-  <div class="d-flex justify-content-end py-4 container-addTask"  >
-    <a href="/new"><button id="add-task" type="button" class="btn color-one <%= addTask(params["check_complet"])%> ">
+  <div class="d-flex justify-content-between py-4 container-addTask"  >
+    <a href="/user/new" type="button" class="btn color-one <%= addTask(params["check_complet"])%> ">
       <span class="py-2 px-4 text-white"
-        >Add Task</span
+        >Add User<i class="far fa-user ml-3"></i></span
       >
-    </button></a>
+    </a>
+    <a href="/new" id="add-task" type="button" class="btn color-one <%= addTask(params["check_complet"])%> ">
+      <span class="py-2 px-4 text-white"
+        ><i class="fas fa-tasks mr-3"></i>Add Task</span
+      >
+    </a>
+   
   </div>
   <div>
     <table class="table table-hover">
@@ -15,7 +21,7 @@
         <tr class="text-light">
           <th scope="col " class="col-1"></th>
           <th scope="col" class="col-5">Task</th>
-          <th scope="col">Complete by</th>
+          <th scope="col">Complete<%= byCompleted(params["check_complet"])%> by</th>
           <th class="text-center" scope="col">Actions</th>
         </tr>
       </thead>
@@ -27,7 +33,7 @@
               <%= form_for(task, {action: updateCheckTaskIDPath({task_id:
               task.ID}), method: "PUT", class: "form"}) { %> 
                 <%= if (!task.CheckComplet) { %>
-              <a ><button type="submit" data-method="PUT" class="btn my-0 py-0 check">
+              <a ><button type="submit" data-method="PUT" class="btn my-0 py-0 check" >
                 <i class="far fa-check-circle"></i>
               </button></a>
               <% } else if (task.CheckComplet) { %>
@@ -49,7 +55,7 @@
             <%= if (!task.CheckComplet) { %>
               <div class="text-center">
                 <a href="/edit/<%= task.ID %>"
-                  ><i id="edit" class="fas fa-pencil-alt mr-3 fa-lg"></i
+                  ><i id="edit" class="fas fa-pencil-alt text-dark mr-3 fa-lg"></i
                 ></a>
                 <a 
                   class="delete"

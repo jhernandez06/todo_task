@@ -4,4 +4,6 @@ create_table("tasks") {
   t.Column("limit_data", "timestamp", {})
   t.Column("description", "text", {})
   t.Column("check_complet", "bool", {})
+  t.Column("user_id", "uuid", {})
+  t.Timestamps()
 }

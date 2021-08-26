@@ -17,6 +17,8 @@ type Task struct {
 	LimitData    time.Time `json:"limit_data" db:"limit_data"`
 	Description  string    `json:"description" db:"description"`
 	CheckComplet bool      `json:"check_complet" db:"check_complet"`
+	UserID       uuid.UUID `json:"user_id" db:"user_id"`
+	User         User      `belongs_to:"user"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }
@@ -43,6 +45,7 @@ func (t *Task) Validate() *validate.Errors {
 		&validators.StringIsPresent{Field: t.Title, Name: "Title"},
 		&validators.TimeIsPresent{Field: t.LimitData, Name: "Limit Data"},
 		&validators.StringIsPresent{Field: t.Description, Name: "Description"},
+		&validators.UUIDIsPresent{Field: t.UserID, Name: "User Id"},
 	)
 }
 

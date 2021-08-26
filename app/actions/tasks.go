@@ -6,6 +6,7 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
+	"github.com/gofrs/uuid"
 )
 
 // Show List
@@ -32,6 +33,28 @@ func TasksList(c buffalo.Context) error {
 
 // New task
 func NewTask(c buffalo.Context) error {
+	tx := c.Value("tx").(*pop.Connection)
+	users := models.Users{}
+	user := models.User{}
+	q := tx.Q()
+	q.Where("active = true")
+
+	if err := q.Order("first_name asc").All(&users); err != nil {
+		return err
+	}
+
+	UsersList := []map[string]interface{}{}
+
+	for _, user := range users {
+		oneUser := map[string]interface{}{
+			user.FirstName + " " + user.LastName: user.ID,
+		}
+		UsersList = append(UsersList, oneUser)
+
+	}
+	c.Set("usersList", UsersList)
+	c.Set("user", user)
+	c.Set("users", users)
 	c.Set("task", models.Task{})
 	return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
 }
@@ -48,7 +71,6 @@ func CreateTask(c buffalo.Context) error {
 	if verrs.HasAny() {
 		c.Set("errors", verrs)
 		c.Set("task", task)
-
 		return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
 	}
 
@@ -77,12 +99,31 @@ func ShowTask(c buffalo.Context) error {
 func EditTask(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	task := models.Task{}
+	users := models.Users{}
+	user := models.User{}
+
 	taskID := c.Param("task_id")
 
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
 		return c.Redirect(http.StatusNotFound, "/")
 	}
+	if err := tx.All(&users); err != nil {
+		return err
+	}
+
+	UsersList := []map[string]interface{}{}
+
+	for _, user := range users {
+		oneUser := map[string]interface{}{
+			user.FirstName + " " + user.LastName: user.ID,
+		}
+		UsersList = append(UsersList, oneUser)
+
+	}
+	c.Set("usersList", UsersList)
+	c.Set("user", user)
+	c.Set("users", users)
 
 	c.Set("task", task)
 	return c.Render(http.StatusOK, r.HTML("task/edit.plush.html"))
@@ -90,48 +131,73 @@ func EditTask(c buffalo.Context) error {
 
 //Update task
 func UpdateTask(c buffalo.Context) error {
-
 	tx := c.Value("tx").(*pop.Connection)
 	task := models.Task{}
 	taskID := c.Param("task_id")
-
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
 		return c.Redirect(404, "/")
 	}
-
 	if err := c.Bind(&task); err != nil {
 		return err
 	}
+	users := models.Users{}
+	user := models.User{}
+	if err := tx.All(&users); err != nil {
+		return err
+	}
+	UsersList := []map[string]interface{}{}
+	for _, user := range users {
+		oneUser := map[string]interface{}{
+			user.FirstName + " " + user.LastName: user.ID,
+		}
+		UsersList = append(UsersList, oneUser)
+	}
+	c.Set("usersList", UsersList)
+	c.Set("user", user)
+	c.Set("users", users)
 	verrs := task.Validate()
 	if verrs.HasAny() {
 		c.Set("errors", verrs)
 		c.Set("task", task)
-
 		return c.Render(http.StatusSeeOther, r.HTML("task/edit.plush.html"))
 	}
 	if err := tx.Update(&task); err != nil {
 		return err
 	}
 	c.Flash().Add("success", "task updated success")
-
 	return c.Redirect(http.StatusSeeOther, "/")
 
 }
 
 //delete
 func DestroyTask(c buffalo.Context) error {
-
 	tx := c.Value("tx").(*pop.Connection)
-
 	task := models.Task{}
-	taskID := c.Param("task_id")
-
+	taskID, _ := uuid.FromString(c.Param("task_id"))
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "no task found with that ID")
 		return c.Redirect(404, "/")
 	}
+	//taskdelete := models.Task{ID: taskID}
 	if err := tx.Destroy(&task); err != nil {
+		return err
+	}
+	c.Flash().Add("success", "task destroyed success")
+	return c.Redirect(http.StatusSeeOther, "/")
+}
+
+func Delete(c buffalo.Context) error {
+
+	tx := c.Value("tx").(*pop.Connection)
+	taskID, _ := uuid.FromString(c.Param("task_id"))
+
+	if c.Param("task_id") == "" {
+		c.Flash().Add("danger", "no task found with that ID")
+		return c.Redirect(404, "/")
+	}
+	taskdelete := &models.Task{ID: taskID}
+	if err := tx.Destroy(taskdelete); err != nil {
 		return err
 	}
 	c.Flash().Add("success", "task destroyed success")
@@ -142,19 +208,15 @@ func DestroyTask(c buffalo.Context) error {
 
 // CheckComplet
 func UpdateTaskCheck(c buffalo.Context) error {
-
 	tx := c.Value("tx").(*pop.Connection)
 	task := models.Task{}
 	taskID := c.Param("task_id")
-
 	if err := tx.Find(&task, taskID); err != nil {
 		return err
 	}
-
 	if err := c.Bind(&task); err != nil {
 		return err
 	}
-
 	if !(task.CheckComplet) {
 		task.CheckComplet = true
 		c.Flash().Add("info", "task completed success, Congratulations")
@@ -165,6 +227,5 @@ func UpdateTaskCheck(c buffalo.Context) error {
 	if err := tx.Update(&task); err != nil {
 		return err
 	}
-
 	return c.Redirect(http.StatusSeeOther, "/")
 }

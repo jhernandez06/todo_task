@@ -29,7 +29,6 @@ var (
 
 func NTasksIncomplet(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
-
 		tx := models.DB()
 		q := tx.Q()
 		tasks := models.Tasks{}
@@ -41,28 +40,26 @@ func NTasksIncomplet(next buffalo.Handler) buffalo.Handler {
 		return next(c)
 	}
 }
+
 func TimeMW(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		t := time.Now()
 		c.Set("Date", t.Format("Monday 02, Jan 2006"))
+		c.Set("Date1", t.Format("2006-01-02T15:04"))
 		return next(c)
 	}
 }
 
 func EditTaskMW(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
-
 		tx := models.DB()
-
 		task := models.Task{}
 		taskID := c.Param("task_id")
-
 		tx.Find(&task, taskID)
 		if task.CheckComplet {
 			c.Flash().Add("danger", "cannot edit a completed task")
 			c.Redirect(http.StatusSeeOther, "/")
 		}
-
 		return next(c)
 	}
 }
