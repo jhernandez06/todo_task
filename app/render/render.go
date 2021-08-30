@@ -3,10 +3,10 @@ package render
 import (
 	base "TodoList"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/gobuffalo/buffalo/render"
-	"github.com/gofrs/uuid"
 )
 
 // Engine for rendering across the app, it provides
@@ -31,7 +31,7 @@ var Helpers = map[string]interface{}{
 	"status":        CheckStatus,
 	"addTask":       AddTask,
 	"byCompleted":   Completed,
-	"idUser":        IdUser,
+	"isValidID":     IsValidUUID,
 }
 
 func Status(completed bool, date time.Time, dateUpdate time.Time) string {
@@ -79,9 +79,7 @@ func Completed(x string) string {
 	}
 	return y
 }
-
-//FALTAN TEST
-func IdUser(a string) uuid.UUID {
-	s, _ := uuid.FromString(a)
-	return s
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }

@@ -2,21 +2,33 @@ package render_test
 
 import (
 	"TodoList/app/render"
+	"fmt"
 	"testing"
+	"time"
 )
 
-// func TestStatus(t *testing.T) {
-// 	statusTrue := render.Status(true)
-// 	if statusTrue != "Was completed on " {
-// 		t.Error("Error")
-// 		t.Fail()
-// 	}
-// 	statusFalse := render.Status(false)
-// 	if statusFalse != "needs to be completed on " {
-// 		t.Error("Error")
-// 		t.Fail()
-// 	}
-// }
+func TestStatus(t *testing.T) {
+	dateUpdate := time.Now()
+	dateLimit := dateUpdate.Add(time.Hour * 24 * 7)
+	dateCurrent := time.Now()
+	statusTrue := render.Status(true, dateLimit, dateUpdate)
+	if statusTrue != fmt.Sprintf("Was completed on %v", dateUpdate.Format("Monday 02, Jan 2006 at 15:04")) {
+		t.Error("Error")
+		t.Fail()
+	}
+	statusFalse := render.Status(false, dateLimit, dateUpdate)
+	if dateCurrent.After(dateLimit) {
+		if statusFalse != fmt.Sprintf("was to be completed on %v", dateLimit.Format("Monday 02, Jan 2006 at 15:04")) {
+			t.Error("Error")
+			t.Fail()
+		}
+	} else {
+		if statusFalse != fmt.Sprintf("needs to be completed on %v", dateLimit.Format("Monday 02, Jan 2006 at 15:04")) {
+			t.Error("Error")
+			t.Fail()
+		}
+	}
+}
 
 func TestIcon(t *testing.T) {
 	var icon string

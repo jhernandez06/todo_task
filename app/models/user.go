@@ -63,7 +63,6 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 			},
 		},
 	), err
-
 }
 
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.

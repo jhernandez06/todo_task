@@ -34,7 +34,6 @@ func CreateUser(c buffalo.Context) error {
 	if err := tx.Create(&user); err != nil {
 		return err
 	}
-	c.Session().Set("current_user_id", user.ID)
 	c.Flash().Add("success", "user created successfully")
 	return c.Redirect(http.StatusSeeOther, "/user/list")
 }
