@@ -1,20 +1,25 @@
 <%= partial("partials/navbar.plush.html") %>
 <%= partial("partials/flash.plush.html") %>
 <section id="tasks" class="container px-5 mx-auto">
-  
-  <div class="d-flex justify-content-between py-4 container-addTask"  >
-    <a href="/user/new" type="button" class="btn color-one <%= addTask(params["check_complet"])%> ">
-      <span class="py-2 px-4 text-white"
-        >Add User<i class="far fa-user ml-3"></i></span
-      >
-    </a>
-    <a href="/new" id="add-task" type="button" class="btn color-one <%= addTask(params["check_complet"])%> ">
-      <span class="py-2 px-4 text-white"
-        ><i class="fas fa-tasks mr-3"></i>Add Task</span
-      >
-    </a>
-   
+  <div class="d-flex justify-content-between container-addTask">
+    <h3 class="my-auto"> 
+      <a class="nav-link title-task" href="/user/show/{<%= current_user.ID %>}"
+      ><%= current_user.FirstName +" "+ current_user.LastName %></a
+    ></h3>
+    <div class="d-flex justify-content-end py-4"  >
+      <%= if (current_user.Role == "admin" ) {%>
+      <a href="/user/newByAdmin" type="button" class="btn color-one <%= addTask(params["check_complet"])%> ">
+        <span class="py-2 px-4 text-white"
+          >Add User<i class="far fa-user ml-3"></i></span
+        ><% } %>
+      </a>
+      <a href="/tasks/new" id="add-task" type="button" class="btn color-one ml-3 <%= addTask(params["check_complet"])%> ">
+        <span class="py-2 px-4 text-white"
+          ><i class="fas fa-tasks mr-3"></i>Add Task</span>
+      </a>
+    </div>
   </div>
+
   <div>
     <table class="table table-hover">
       <thead class="table color-two">
@@ -30,7 +35,7 @@
         <tr>
           <th scope="row">
             <div class="form-check text-center">
-              <%= form_for(task, {action: updateCheckTaskIDPath({task_id:
+              <%= form_for(task, {action: tasksUpdateCheckTaskIDPath({task_id:
               task.ID}), method: "PUT", class: "form"}) { %> 
                 <%= if (!task.CheckComplet) { %>
               <a ><button type="submit" data-method="PUT" class="btn my-0 py-0 check" >
@@ -45,7 +50,7 @@
           </th>
           <td>
             <span
-              ><a class="text-task" href="/show/<%= task.ID %>"
+              ><a class="text-task" href="/tasks/show/<%= task.ID %>"
                 ><%= task.Title %></a
               ></span
             >
@@ -54,7 +59,7 @@
           <td>
             <%= if (!task.CheckComplet) { %>
               <div class="text-center">
-                <a href="/edit/<%= task.ID %>"
+                <a href="/tasks/edit/<%= task.ID %>"
                   ><i id="edit" class="fas fa-pencil-alt text-dark mr-3 fa-lg"></i
                 ></a>
                 <a 

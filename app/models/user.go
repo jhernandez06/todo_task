@@ -2,24 +2,63 @@ package models
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	FirstName string    `json:"first_name" db:"first_name"`
-	LastName  string    `json:"last_name" db:"last_name"`
-	Email     string    `json:"email" db:"email"`
-	Active    bool      `json:"active" db:"active"`
-	Tasks     Tasks     `has_many:"tasks" order_by:"title asc"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID                   uuid.UUID `json:"id" db:"id"`
+	FirstName            string    `json:"first_name" db:"first_name"`
+	LastName             string    `json:"last_name" db:"last_name"`
+	Email                string    `json:"email" db:"email"`
+	Active               bool      `json:"active" db:"active"`
+	PasswordHash         string    `json:"-" db:"password_hash"`
+	Password             string    `json:"-" db:"-"`
+	PasswordConfirmation string    `json:"-" db:"-"`
+	Role                 string    `json:"role" db:"role"`
+	Tasks                Tasks     `has_many:"tasks" order_by:"title asc"`
+	CreatedAt            time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// Create wraps up the pattern of encrypting the password and
+// running validations. Useful when writing tests.
+func (u *User) Create(tx *pop.Connection) (*validate.Errors, error) {
+	u.Email = strings.ToLower(u.Email)
+	u.Role = "user"
+	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return validate.NewErrors(), errors.WithStack(err)
+	}
+	u.PasswordHash = string(ph)
+	return tx.ValidateAndCreate(u)
+}
+func (u *User) CreateByAdmin(tx *pop.Connection) (*validate.Errors, error) {
+	u.Email = strings.ToLower(u.Email)
+	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return validate.NewErrors(), errors.WithStack(err)
+	}
+	u.PasswordHash = string(ph)
+	return tx.ValidateAndCreate(u)
+}
+func (u *User) Update(tx *pop.Connection) (*validate.Errors, error) {
+	u.Email = strings.ToLower(u.Email)
+	//u.Role = "user"
+	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return validate.NewErrors(), errors.WithStack(err)
+	}
+	u.PasswordHash = string(ph)
+	return tx.ValidateAndUpdate(u)
 }
 
 // String is not required by pop and may be deleted
@@ -44,7 +83,22 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: u.FirstName, Name: "FirstName"},
 		&validators.StringIsPresent{Field: u.LastName, Name: "LastName"},
+		&validators.StringIsPresent{Field: u.PasswordHash, Name: "PasswordHash"},
 		&validators.EmailIsPresent{Field: u.Email, Name: "Email"},
+		&validators.FuncValidator{
+			Field:   u.Role,
+			Name:    "Role",
+			Message: "%s is an invalid role",
+			Fn: func() bool {
+				roles := [2]string{"admin", "user"}
+				for _, role := range roles {
+					if u.Role == role {
+						return true
+					}
+				}
+				return false
+			},
+		},
 		&validators.FuncValidator{
 			Field:   u.Email,
 			Name:    "Email",
@@ -68,11 +122,19 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
 // This method is not required and may be deleted.
 func (u *User) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
+	var err error
+	return validate.Validate(
+		&validators.StringIsPresent{Field: u.Password, Name: "Password"},
+		&validators.StringsMatch{Name: "Password", Field: u.Password, Field2: u.PasswordConfirmation, Message: "Password does not match confirmation"},
+	), err
 }
 
 // ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
 // This method is not required and may be deleted.
 func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
+	var err error
+	return validate.Validate(
+		&validators.StringIsPresent{Field: u.Password, Name: "Password"},
+		&validators.StringsMatch{Name: "Password", Field: u.Password, Field2: u.PasswordConfirmation, Message: "Password does not match confirmation"},
+	), err
 }

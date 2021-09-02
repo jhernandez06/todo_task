@@ -1,15 +1,17 @@
-<%= partial("partials/navbar.plush.html") %>
-
 <section id="new-task" class="container px-5 w-75 bg-white mt-5 p-5 ">
     <h3 class="fw-bolder mb-3">New User</h3>
 <%= form_for(user, {action: "/user/create", method: "POST", class: "form"}) { %>
     <div class="mb-3 grid-form">
         <%= f.InputTag("FirstName") %>
         <%= f.InputTag("LastName") %>      
-    </div>
+    </div>  
     <%= f.InputTag("Email") %>
+  <div class="mb-3 grid-form">
+    <%=f.InputTag("Password", {type: "password"}) %>
+    <%=f.InputTag("PasswordConfirmation", {type: "password"}) %>
+  </div>
+ 
     <div class="mt-4 d-flex justify-content-between">
-       <%= f.CheckboxTag("Active", {label: "Enable this user?"}) %>
         <div>
             <a href="/" id="cancel" class="btn btn-light py-2 px-3 mx-3 text-dark" >Cancel</a>
             <button  class="btn color-one py-2 px-3 text-white" type="submit">Create User</button>

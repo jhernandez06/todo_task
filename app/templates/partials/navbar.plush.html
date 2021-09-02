@@ -1,7 +1,7 @@
 <nav class="nav color-one pt-4 pb-3">
     <div class="container w-50 d-flex">
       <h1 class="text-light h1 px-3 mr-4">
-        <a class="text-white" href="/">ToDo List</a>
+        <a class="text-white" href="/tasks">ToDo List</a>
       </h1>
       <div
         class="h-75 my-auto px-4 b-left d-flex flex-column justify-content-center"
@@ -18,17 +18,21 @@
     </div>
     <div class="container w-50 d-flex justify-content-end"> 
       <a 
-        class="nav-link text-light "
+        class="nav-link text-light <%= roleUser(current_user.Role) %> "
         href="/user/list"
         >Users</a
       >
-      <a id="incomplete" class="nav-link text-light  <%= status(params["check_complet"],"true")%>" href="/?check_complet=false"
-        >Incomplete Tasks
+      <a id="incomplete" class="nav-link text-light  <%= status(params["check_complet"],"true")%>" href="/tasks/?check_complet=false"
+        >Incomplete Tasks 
       </a>
       <a id="completed"
-        class="nav-link text-light <%= status(params["check_complet"],"false")%> "
-        href="/?check_complet=true"
+        class="nav-link text-light <%= status(params["check_complet"],"false")%>"
+        href="/tasks/?check_complet=true"
         >Completed Tasks</a
       >
+      <!-- <a class="nav-link text-light"  href="<%= signoutPath() %>" data-method = "DELETE" data-confirm="Are you sure?"
+        >Sing Out
+      </a> -->
+      <a href="<%= signoutPath() %>" data-method="DELETE" class="nav-link text-light"> Sign Out </a>
     </div>
   </nav>

@@ -11,12 +11,12 @@
     <hr class="my-4">
     <div class="d-flex justify-content-between">
         <div >
-            <a class="btn btn-light py-2 px-4 btn-lg text-dark" href="/" role="button">Back</a>
+            <a class="btn btn-light py-2 px-4 btn-lg text-dark" href="/tasks/" role="button">Back</a>
 
         </div>
         <%= if (!task.CheckComplet) { %>
             <div>
-                <a class="btn btn-primary btn-lg px-4" href="/edit/<%= task.ID %>" role="button">Edit</a>
+                <a class="btn btn-primary btn-lg px-4" href="/tasks/edit/<%= task.ID %>" role="button">Edit</a>
             </div>
             <% }  %>
     </div>

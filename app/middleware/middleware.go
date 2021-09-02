@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gobuffalo/buffalo"
 	tx "github.com/gobuffalo/buffalo-pop/v2/pop/popmw"
 	csrf "github.com/gobuffalo/mw-csrf"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
+
+	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v5"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -32,12 +35,14 @@ func NTasksIncomplet(next buffalo.Handler) buffalo.Handler {
 		tx := models.DB()
 		q := tx.Q()
 		tasks := models.Tasks{}
-		q.Where("check_complet = false")
+		//user, _ := c.Value("current_user").(*models.User)
+		q.Where("check_complet = false") //.Where("current_user_id = ?", user.ID)
 		if err := q.All(&tasks); err != nil {
 			return err
 		}
 		c.Set("ntasks", len(tasks))
 		return next(c)
+
 	}
 }
 
@@ -61,5 +66,61 @@ func EditTaskMW(next buffalo.Handler) buffalo.Handler {
 			c.Redirect(http.StatusSeeOther, "/")
 		}
 		return next(c)
+	}
+}
+
+// SetCurrentUser attempts to find a user based on the current_user_id
+// in the session. If one is found it is set on the context.
+func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		if uid := c.Session().Get("current_user_id"); uid != nil {
+			u := &models.User{}
+			tx := c.Value("tx").(*pop.Connection)
+			err := tx.Find(u, uid)
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			c.Set("current_user", u)
+		}
+		return next(c)
+	}
+}
+
+// Authorize require a user be logged in before accessing a route
+func Authorize(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		if uid := c.Session().Get("current_user_id"); uid == nil {
+			c.Session().Set("redirectURL", c.Request().URL.String())
+			err := c.Session().Save()
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			c.Flash().Add("danger", "You must be authorized to see that page")
+			return c.Redirect(302, "/")
+		}
+		return next(c)
+	}
+}
+
+// AdminRequired requires a user to be logged in and to be an admin before accessing a route.
+func Admin(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		user, ok := c.Value("current_user").(*models.User)
+		if ok && user.Role == "admin" {
+			return next(c)
+		}
+		c.Flash().Add("danger", "You are not authorized to view that page.")
+		return c.Redirect(302, "/tasks")
+	}
+}
+
+func Active(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		user, ok := c.Value("current_user").(*models.User)
+		if ok && user.Active == true {
+			return next(c)
+		}
+		c.Flash().Add("danger", "You are not activated to create tasks.")
+		return c.Redirect(302, "/tasks")
 	}
 }

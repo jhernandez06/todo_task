@@ -9,7 +9,7 @@ $(() => {
         let x = $(this).attr('data-id');
         //let deleteBtn = '<a href="/delete/'+$(this).attr('data-id')+'" data-method="DELETE" ><button type="button" class="btn btn-primary">Delete</button></a>';
         //let deleteBtn = `<%=linkTo(deleteTaskIDPath({ task_id: ${x} }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>`;
-       let deleteBtn = `<a href="/delete/${x}" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger btn-xs" data-remote="true" data-type="script">Delete</a>`
+       let deleteBtn = `<a href="/tasks/delete/${x}" data-method="DELETE" data-confirm="Are you sure?" class="btn btn-danger btn-xs" data-remote="true" data-type="script">Delete</a>`
 
         document.getElementById('deleteTask').innerHTML = deleteBtn;
      });

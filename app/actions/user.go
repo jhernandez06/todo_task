@@ -3,16 +3,23 @@ package actions
 import (
 	"TodoList/app/models"
 	"net/http"
-	"strings"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
 )
 
+func Index(c buffalo.Context) error {
+	c.Set("user", models.User{})
+	return c.Render(http.StatusOK, r.HTML("user/index.plush.html"))
+}
 func NewUser(c buffalo.Context) error {
 	c.Set("user", models.User{})
 	return c.Render(http.StatusOK, r.HTML("user/new.plush.html"))
+}
+func NewUserByAdmin(c buffalo.Context) error {
+	c.Set("user", models.User{})
+	return c.Render(http.StatusOK, r.HTML("user/newByAdmin.plush.html"))
 }
 
 func CreateUser(c buffalo.Context) error {
@@ -21,7 +28,8 @@ func CreateUser(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-	verrs, err := user.Validate(tx)
+
+	verrs, err := user.Create(tx)
 	if err != nil {
 		return err
 	}
@@ -29,13 +37,30 @@ func CreateUser(c buffalo.Context) error {
 		c.Set("errors", verrs)
 		c.Set("user", user)
 		return c.Render(http.StatusOK, r.HTML("user/new.plush.html"))
+
 	}
-	user.Email = strings.ToLower(user.Email)
-	if err := tx.Create(&user); err != nil {
+	c.Session().Set("current_user_id", user.ID)
+	c.Flash().Add("success", "user created successfully")
+	return c.Redirect(http.StatusSeeOther, "/tasks")
+}
+func CreateUserByAdmin(c buffalo.Context) error {
+	tx := c.Value("tx").(*pop.Connection)
+	user := models.User{}
+	if err := c.Bind(&user); err != nil {
 		return err
 	}
+	verrs, err := user.CreateByAdmin(tx)
+	if err != nil {
+		return err
+	}
+	if verrs.HasAny() {
+		c.Set("errors", verrs)
+		c.Set("user", user)
+		return c.Render(http.StatusOK, r.HTML("user/newByAdmin.plush.html"))
+	}
+	//c.Session().Set("current_user_id", user.ID)
 	c.Flash().Add("success", "user created successfully")
-	return c.Redirect(http.StatusSeeOther, "/user/list")
+	return c.Redirect(http.StatusSeeOther, "/tasks")
 }
 func UsersList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
@@ -71,6 +96,7 @@ func EditUser(c buffalo.Context) error {
 }
 func UpdateUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
 	if err := tx.Find(&user, userID); err != nil {
@@ -93,7 +119,10 @@ func UpdateUser(c buffalo.Context) error {
 		return err
 	}
 	c.Flash().Add("success", "user updated successfully")
-	return c.Redirect(http.StatusSeeOther, "/user/list")
+	if currentUser.Role == "admin" {
+		return c.Redirect(http.StatusSeeOther, "/user/list")
+	}
+	return c.Redirect(http.StatusSeeOther, "/tasks")
 
 }
 func DestroyUser(c buffalo.Context) error {
