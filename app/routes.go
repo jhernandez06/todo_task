@@ -26,10 +26,10 @@ func setRoutes(root *buffalo.App) {
 	root.GET("/tasks/", actions.TasksList)
 	root.GET("/tasks/new", middleware.Active(actions.NewTask))
 	root.POST("/tasks/create", middleware.Active(actions.CreateTask))
-	root.GET("/tasks/delete/{task_id}", actions.DestroyTask)
+	root.GET("/tasks/delete/{task_id}", middleware.Active(actions.DestroyTask))
 	root.GET("/tasks/show/{task_id}", actions.ShowTask)
 	root.GET("/tasks/edit/{task_id}", middleware.EditTaskMW(actions.EditTask))
-	root.PUT("/tasks/update/{task_id}", actions.UpdateTask)
+	root.PUT("/tasks/update/{task_id}", middleware.Active(actions.UpdateTask))
 	root.PUT("/tasks/updateCheck/{task_id}", actions.UpdateTaskCheck)
 
 	root.GET("/user/new", actions.NewUser)

@@ -38,9 +38,9 @@ func CreateUser(c buffalo.Context) error {
 		c.Set("user", user)
 		return c.Render(http.StatusOK, r.HTML("user/new.plush.html"))
 	}
-	c.Session().Set("current_user_id", user.ID)
-	c.Flash().Add("success", "user created successfully")
-	return c.Redirect(http.StatusSeeOther, "/tasks")
+	//c.Session().Set("current_user_id", user.ID)
+	c.Flash().Add("success", "user registered successfully")
+	return c.Redirect(http.StatusSeeOther, "/")
 }
 func CreateUserByAdmin(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)

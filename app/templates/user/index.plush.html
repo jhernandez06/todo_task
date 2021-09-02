@@ -1,13 +1,14 @@
+<%= partial("partials/flash.plush.html") %>
 <div class="container my-5 pt-5 w-75 d-flex align-items-center">
     <div class="container">
         <h1 class="display-2"> <a href="/" class="nav-link logo">ToDoList</a></h1>
-        <p class="lead">
+        <p class="lead ml-4">
             Wawandco 2021 training app
         </p>
     </div>
     <div class="container ">
         <div class="w-100 card w-card">
-            <div class="card-body">
+            <div class="card-body mt-3">
                 <%= form_for(user, {action: signinPath(), method: "POST", class: "form"}) { %>
                     
                     <%= f.InputTag("Email") %>
@@ -17,7 +18,7 @@
                         </div>  
                         <% } %>
                         <hr class="my-4"> 
-                        <div>
+                        <div class="mb-4">
                             <a href="/user/new" class="btn btn-secondary w-100 py-2 text-center">Sign up</a>
                         </div>
                     </div>

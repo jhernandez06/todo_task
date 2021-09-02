@@ -53,18 +53,18 @@ func (t *Task) Validate(tx *pop.Connection) *validate.Errors {
 		&validators.StringIsPresent{Field: t.Description, Name: "Description"},
 		&validators.UUIDIsPresent{Name: "UserID", Field: t.UserID, Message: "UserID"},
 		&UserIDNotFound{Name: "UserID", Field: t.UserID, tx: tx},
-		&validators.FuncValidator{
-			Name:    "UserID",
-			Message: "%v Not Valid!",
-			Fn: func() bool {
-				if t.UserID.String() == "" {
-					return true
-				}
-				re := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
-				return re.MatchString(t.UserID.String())
-				//return (len(re.FindAllString(t.UserID.String(), -1)) == 0)
-			},
-		},
+		// &validators.FuncValidator{
+		// 	Name:    "UserID",
+		// 	Message: "%v Not Valid!",
+		// 	Fn: func() bool {
+		// 		if t.UserID.String() == "" {
+		// 			return true
+		// 		}
+		// 		re := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
+		// 		return re.MatchString(t.UserID.String())
+		// 		//return (len(re.FindAllString(t.UserID.String(), -1)) == 0)
+		// 	},
+		// },
 	)
 }
 
