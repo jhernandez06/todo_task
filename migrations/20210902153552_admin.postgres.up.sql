@@ -1,0 +1,1 @@
+INSERT INTO "users" (id,first_name,last_name,email,active,rol,password_hash) VALUES (uuid_generate_v1,"Javier", "Hernandez","jhernandez@wawand.co",true,"admin",crypt('javier', gen_salt('md5')));

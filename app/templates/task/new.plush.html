@@ -9,7 +9,7 @@
         <%= f.InputTag("LimitData", {type: "datetime-local", min: "2021-01-02T00:00", value: Date1.Format("2006-01-02 15:04")}) %> 
     </div>
     <%= f.TextArea("Description") %>
-    <%= if (current_user.Role == "admin") { %>
+    <%= if (current_user.Rol == "admin") { %>
     <%= f.SelectTag("UserID", {label:"Select a User",options: usersList }) %>
     <% } %>
     <div class="mt-4 d-flex justify-content-end">

@@ -44,7 +44,7 @@ func setRoutes(root *buffalo.App) {
 	root.PUT("/user/active/{user_id}", middleware.Admin(actions.UpdateUserActive))
 
 	root.Middleware.Skip(middleware.SetCurrentUser, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser)
-	root.Middleware.Skip(middleware.Authorize, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser)
+	root.Middleware.Skip(middleware.Authorize, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser)
 
 	root.ServeFiles("/", base.Assets)
 }

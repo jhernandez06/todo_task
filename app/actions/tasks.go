@@ -18,7 +18,7 @@ func TasksList(c buffalo.Context) error {
 	if status == "true" || status == "false" {
 		q.Where("check_complet = ?", status)
 	}
-	if currentUser.Role == "user" {
+	if currentUser.Rol == "user" {
 		q.Where("user_id = ?", currentUser.ID)
 	}
 
@@ -36,7 +36,7 @@ func NewTask(c buffalo.Context) error {
 	currentUser := c.Value("current_user").(*models.User)
 	users := models.Users{}
 	user := models.User{}
-	if currentUser.Role == "admin" {
+	if currentUser.Rol == "admin" {
 		q := tx.Q()
 		q.Where("active = true")
 		if err := q.Order("first_name asc").All(&users); err != nil {
@@ -72,7 +72,7 @@ func CreateTask(c buffalo.Context) error {
 	if err := q.Order("first_name asc").All(&users); err != nil {
 		return err
 	}
-	if currentUser.Role == "admin" {
+	if currentUser.Rol == "admin" {
 		UsersList := []map[string]interface{}{}
 		for _, user := range users {
 			oneUser := map[string]interface{}{

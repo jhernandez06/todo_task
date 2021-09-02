@@ -37,7 +37,6 @@ func CreateUser(c buffalo.Context) error {
 		c.Set("errors", verrs)
 		c.Set("user", user)
 		return c.Render(http.StatusOK, r.HTML("user/new.plush.html"))
-
 	}
 	c.Session().Set("current_user_id", user.ID)
 	c.Flash().Add("success", "user created successfully")
@@ -58,7 +57,6 @@ func CreateUserByAdmin(c buffalo.Context) error {
 		c.Set("user", user)
 		return c.Render(http.StatusOK, r.HTML("user/newByAdmin.plush.html"))
 	}
-	//c.Session().Set("current_user_id", user.ID)
 	c.Flash().Add("success", "user created successfully")
 	return c.Redirect(http.StatusSeeOther, "/tasks")
 }
@@ -119,7 +117,7 @@ func UpdateUser(c buffalo.Context) error {
 		return err
 	}
 	c.Flash().Add("success", "user updated successfully")
-	if currentUser.Role == "admin" {
+	if currentUser.Rol == "admin" {
 		return c.Redirect(http.StatusSeeOther, "/user/list")
 	}
 	return c.Redirect(http.StatusSeeOther, "/tasks")

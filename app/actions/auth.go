@@ -43,6 +43,14 @@ func AuthCreate(c buffalo.Context) error {
 		c.Set("user", u)
 		return c.Render(http.StatusUnauthorized, r.HTML("user/index.plush.html"))
 	}
+	inactived := func() error {
+		verrs := validate.NewErrors()
+		verrs.Add("email", "inactive user")
+		c.Set("errors", verrs)
+		c.Set("user", u)
+		return c.Render(http.StatusUnauthorized, r.HTML("user/index.plush.html"))
+	}
+
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			//couldn't find an user with the supplied email address.
@@ -54,6 +62,9 @@ func AuthCreate(c buffalo.Context) error {
 	err = bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(u.Password))
 	if err != nil {
 		return bad()
+	}
+	if !u.Active {
+		return inactived()
 	}
 	c.Session().Set("current_user_id", u.ID)
 	c.Flash().Add("success", "Welcome Back!")

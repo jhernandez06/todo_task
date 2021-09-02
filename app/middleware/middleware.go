@@ -106,7 +106,7 @@ func Authorize(next buffalo.Handler) buffalo.Handler {
 func Admin(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		user, ok := c.Value("current_user").(*models.User)
-		if ok && user.Role == "admin" {
+		if ok && user.Rol == "admin" {
 			return next(c)
 		}
 		c.Flash().Add("danger", "You are not authorized to view that page.")

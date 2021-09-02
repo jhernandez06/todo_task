@@ -59,7 +59,7 @@ CREATE TABLE public.users (
     last_name character varying(255) NOT NULL,
     email character varying(255) NOT NULL,
     active boolean NOT NULL,
-    role character varying(255) NOT NULL,
+    rol character varying(255) NOT NULL,
     password_hash character varying(255) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL

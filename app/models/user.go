@@ -23,7 +23,7 @@ type User struct {
 	PasswordHash         string    `json:"-" db:"password_hash"`
 	Password             string    `json:"-" db:"-"`
 	PasswordConfirmation string    `json:"-" db:"-"`
-	Role                 string    `json:"role" db:"role"`
+	Rol                  string    `json:"rol" db:"rol"`
 	Tasks                Tasks     `has_many:"tasks" order_by:"title asc"`
 	CreatedAt            time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt            time.Time `json:"updated_at" db:"updated_at"`
@@ -33,7 +33,7 @@ type User struct {
 // running validations. Useful when writing tests.
 func (u *User) Create(tx *pop.Connection) (*validate.Errors, error) {
 	u.Email = strings.ToLower(u.Email)
-	u.Role = "user"
+	u.Rol = "user"
 	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return validate.NewErrors(), errors.WithStack(err)
@@ -52,7 +52,7 @@ func (u *User) CreateByAdmin(tx *pop.Connection) (*validate.Errors, error) {
 }
 func (u *User) Update(tx *pop.Connection) (*validate.Errors, error) {
 	u.Email = strings.ToLower(u.Email)
-	//u.Role = "user"
+	//u.Rol = "user"
 	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return validate.NewErrors(), errors.WithStack(err)
@@ -86,13 +86,13 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		&validators.StringIsPresent{Field: u.PasswordHash, Name: "PasswordHash"},
 		&validators.EmailIsPresent{Field: u.Email, Name: "Email"},
 		&validators.FuncValidator{
-			Field:   u.Role,
-			Name:    "Role",
-			Message: "%s is an invalid role",
+			Field:   u.Rol,
+			Name:    "Rol",
+			Message: "%s is an invalid rol",
 			Fn: func() bool {
 				roles := [2]string{"admin", "user"}
-				for _, role := range roles {
-					if u.Role == role {
+				for _, rol := range roles {
+					if u.Rol == rol {
 						return true
 					}
 				}
