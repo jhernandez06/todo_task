@@ -131,7 +131,7 @@ func Admin(next buffalo.Handler) buffalo.Handler {
 func Active(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		user, ok := c.Value("current_user").(*models.User)
-		if ok && user.Active == true {
+		if ok && user.StatusUser == "activated" {
 			return next(c)
 		}
 		c.Flash().Add("danger", "You are not activated to create tasks.")

@@ -69,6 +69,7 @@ CREATE TABLE public.tasks (
     limit_data timestamp without time zone NOT NULL,
     description text NOT NULL,
     check_complet boolean NOT NULL,
+    priority character varying(255) NOT NULL,
     user_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -86,7 +87,7 @@ CREATE TABLE public.users (
     first_name character varying(255) NOT NULL,
     last_name character varying(255) NOT NULL,
     email character varying(255) NOT NULL,
-    active boolean NOT NULL,
+    status_user character varying(255) NOT NULL,
     rol character varying(255) NOT NULL,
     password_hash character varying(255) NOT NULL,
     created_at timestamp without time zone NOT NULL,

@@ -29,7 +29,6 @@ func CreateUser(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-
 	verrs, err := user.Create(tx)
 	if err != nil {
 		return err
@@ -39,7 +38,6 @@ func CreateUser(c buffalo.Context) error {
 		c.Set("user", user)
 		return c.Render(http.StatusOK, r.HTML("user/new.plush.html"))
 	}
-	//c.Session().Set("current_user_id", user.ID)
 	c.Flash().Add("success", "user registered successfully")
 	return c.Redirect(http.StatusSeeOther, "/")
 }
@@ -49,7 +47,7 @@ func CreateUserByAdmin(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-	verrs, err := user.CreateByAdmin(tx)
+	verrs, err := user.Validate(tx)
 	if err != nil {
 		return err
 	}
@@ -57,6 +55,10 @@ func CreateUserByAdmin(c buffalo.Context) error {
 		c.Set("errors", verrs)
 		c.Set("user", user)
 		return c.Render(http.StatusOK, r.HTML("user/newByAdmin.plush.html"))
+	}
+	user.StatusUser = "invited"
+	if err := tx.Create(&user); err != nil {
+		return err
 	}
 	c.Flash().Add("success", "user created successfully")
 	return c.Redirect(http.StatusSeeOther, "/user/list")
@@ -95,7 +97,7 @@ func EditUser(c buffalo.Context) error {
 }
 func UpdateUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
-	currentUser := c.Value("current_user").(*models.User)
+	// currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
 	if err := tx.Find(&user, userID); err != nil {
@@ -105,7 +107,13 @@ func UpdateUser(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-	verrs, err := user.Validate(tx)
+	fmt.Println("*********HASTA AQUI BIEN*********")
+	if user.StatusUser == "invited" {
+		fmt.Println("*******CONDICIONAL**********")
+		user.StatusUser = "activated"
+	}
+	fmt.Println(user.StatusUser)
+	verrs, err := user.Update(tx)
 	if err != nil {
 		return err
 	}
@@ -114,14 +122,15 @@ func UpdateUser(c buffalo.Context) error {
 		c.Set("user", user)
 		return c.Render(http.StatusSeeOther, r.HTML("user/edit.plush.html"))
 	}
-	if err := tx.Update(&user); err != nil {
-		return err
-	}
+	// if err := tx.Update(&user); err != nil {
+	// 	return err
+	// }
+
 	c.Flash().Add("success", "user updated successfully")
-	if currentUser.Rol == "admin" {
-		return c.Redirect(http.StatusSeeOther, "/user/list")
-	}
-	return c.Redirect(http.StatusSeeOther, "/tasks")
+	// if currentUser.Rol == "admin" {
+	// 	return c.Redirect(http.StatusSeeOther, "/user/list")
+	// }
+	return c.Redirect(http.StatusSeeOther, "/")
 
 }
 func DestroyUser(c buffalo.Context) error {
@@ -135,7 +144,6 @@ func DestroyUser(c buffalo.Context) error {
 		return c.Redirect(404, "/user/list")
 	}
 	if user.ID == currentUser.ID {
-		fmt.Println("POR AQUI PASE  *********")
 		c.Session().Clear()
 		path = "/"
 	}
@@ -157,11 +165,14 @@ func UpdateUserActive(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-	if !(user.Active) {
-		user.Active = true
+	if user.StatusUser == "invited" {
+		c.Flash().Add("info", "the user has not assigned a password")
+	}
+	if user.StatusUser == "disabled" {
+		user.StatusUser = "activated"
 		c.Flash().Add("info", "User Activated successfully")
-	} else if user.Active {
-		user.Active = false
+	} else if user.StatusUser == "activated" {
+		user.StatusUser = "disabled"
 		c.Flash().Add("info", "User disable")
 	}
 	if err := tx.Update(&user); err != nil {

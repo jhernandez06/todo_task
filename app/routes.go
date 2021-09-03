@@ -16,8 +16,8 @@ func setRoutes(root *buffalo.App) {
 	root.Use(middleware.NTasksIncomplet)
 	root.Use(middleware.TimeMW)
 
-	root.Use(middleware.Authorize)
-	root.Use(middleware.SetCurrentUser)
+	//root.Use(middleware.Authorize)
+	//root.Use(middleware.SetCurrentUser)
 
 	root.GET("/", actions.Index)
 	root.POST("/signin", actions.AuthCreate)

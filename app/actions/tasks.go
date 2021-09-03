@@ -38,7 +38,7 @@ func NewTask(c buffalo.Context) error {
 	user := models.User{}
 	if currentUser.Rol == "admin" {
 		q := tx.Q()
-		q.Where("active = true")
+		q.Where("status_user = ?", "activated")
 		if err := q.Order("first_name asc").All(&users); err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ func CreateTask(c buffalo.Context) error {
 	users := models.Users{}
 	user := models.User{}
 	q := tx.Q()
-	q.Where("active = true")
+	q.Where("status_user = ?", "activated")
 	if err := q.Order("first_name asc").All(&users); err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func EditTask(c buffalo.Context) error {
 		return c.Redirect(http.StatusNotFound, "tasks/")
 	}
 	q := tx.Q()
-	q.Where("active = true")
+	q.Where("status_user = ?", "activated")
 	if err := q.Order("first_name asc").All(&users); err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func UpdateTask(c buffalo.Context) error {
 	users := models.Users{}
 	user := models.User{}
 	q := tx.Q()
-	q.Where("active = true")
+	q.Where("status_user = ?", "activated")
 	if err := q.Order("first_name asc").All(&users); err != nil {
 		return err
 	}

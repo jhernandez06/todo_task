@@ -18,6 +18,7 @@ type Task struct {
 	LimitData    time.Time `json:"limit_data" db:"limit_data"`
 	Description  string    `json:"description" db:"description"`
 	CheckComplet bool      `json:"check_complet" db:"check_complet"`
+	Priority     string    `json:"priority" db:"priority"`
 	UserID       uuid.UUID `json:"user_id" db:"user_id"`
 	User         User      `belongs_to:"user"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
@@ -87,7 +88,7 @@ type UserIDNotFound struct {
 }
 
 func (v *UserIDNotFound) IsValid(errors *validate.Errors) {
-	query := v.tx.Where("id = ?", v.Field).Where("active = true")
+	query := v.tx.Where("id = ?", v.Field).Where("status_user = ?", "activated")
 	queryUser := User{}
 	err := query.First(&queryUser)
 	if err != nil {

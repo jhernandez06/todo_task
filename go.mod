@@ -10,7 +10,6 @@ require (
 	github.com/gobuffalo/mw-csrf v1.0.0
 	github.com/gobuffalo/mw-paramlogger v1.0.0
 	github.com/gobuffalo/plush/v4 v4.1.6 // indirect
-	github.com/gobuffalo/pop v4.13.1+incompatible
 	github.com/gobuffalo/pop/v5 v5.3.4
 	github.com/gobuffalo/suite/v3 v3.0.2
 	github.com/gobuffalo/validate/v3 v3.3.0

@@ -19,7 +19,7 @@ type User struct {
 	FirstName            string    `json:"first_name" db:"first_name"`
 	LastName             string    `json:"last_name" db:"last_name"`
 	Email                string    `json:"email" db:"email"`
-	Active               bool      `json:"active" db:"active"`
+	StatusUser           string    `json:"status_user" db:"status_user"`
 	PasswordHash         string    `json:"-" db:"password_hash"`
 	Password             string    `json:"-" db:"-"`
 	PasswordConfirmation string    `json:"-" db:"-"`
@@ -34,6 +34,7 @@ type User struct {
 func (u *User) Create(tx *pop.Connection) (*validate.Errors, error) {
 	u.Email = strings.ToLower(u.Email)
 	u.Rol = "user"
+	u.StatusUser = "disabled"
 	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return validate.NewErrors(), errors.WithStack(err)
@@ -83,7 +84,7 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: u.FirstName, Name: "FirstName"},
 		&validators.StringIsPresent{Field: u.LastName, Name: "LastName"},
-		&validators.StringIsPresent{Field: u.PasswordHash, Name: "PasswordHash"},
+		//&validators.StringIsPresent{Field: u.PasswordHash, Name: "PasswordHash"},
 		&validators.EmailIsPresent{Field: u.Email, Name: "Email"},
 		&validators.FuncValidator{
 			Field:   u.Rol,
