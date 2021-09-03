@@ -3,6 +3,7 @@ package actions
 import (
 	"TodoList/app/models"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -66,8 +67,9 @@ func AuthCreate(c buffalo.Context) error {
 	if !u.Active {
 		return inactived()
 	}
+	msg := fmt.Sprintf("Welcome %s!!", u.FirstName)
 	c.Session().Set("current_user_id", u.ID)
-	c.Flash().Add("success", "Welcome Back!")
+	c.Flash().Add("success", msg)
 	return c.Redirect(302, "/tasks")
 }
 

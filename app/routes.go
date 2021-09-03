@@ -30,7 +30,7 @@ func setRoutes(root *buffalo.App) {
 	root.GET("/tasks/show/{task_id}", actions.ShowTask)
 	root.GET("/tasks/edit/{task_id}", middleware.EditTaskMW(actions.EditTask))
 	root.PUT("/tasks/update/{task_id}", middleware.Active(actions.UpdateTask))
-	root.PUT("/tasks/updateCheck/{task_id}", actions.UpdateTaskCheck)
+	root.PUT("/tasks/updateCheck/{task_id}", middleware.Active(actions.UpdateTaskCheck))
 
 	root.GET("/user/new", actions.NewUser)
 	root.GET("/user/newByAdmin", middleware.Admin(actions.NewUserByAdmin))

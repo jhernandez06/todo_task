@@ -35,7 +35,6 @@ func NTasksIncomplet(next buffalo.Handler) buffalo.Handler {
 		tx := models.DB()
 		q := tx.Q()
 		tasks := models.Tasks{}
-		//user, _ := c.Value("current_user").(*models.User)
 		if uid := c.Session().Get("current_user_id"); uid != nil {
 			u := &models.User{}
 			tx := c.Value("tx").(*pop.Connection)
@@ -43,16 +42,21 @@ func NTasksIncomplet(next buffalo.Handler) buffalo.Handler {
 			if err != nil {
 				return errors.WithStack(err)
 			}
-			q.Where("check_complet = false").Where("user_id = ?", uid)
-			if err := q.All(&tasks); err != nil {
-				return err
+			if u.Rol == "admin" {
+				q.Where("check_complet = false")
+				if err := q.All(&tasks); err != nil {
+					return err
+				}
+			} else {
+				q.Where("check_complet = false").Where("user_id = ?", uid)
+				if err := q.All(&tasks); err != nil {
+					return err
+				}
 			}
 			c.Set("current_user", u)
 			c.Set("ntasks", len(tasks))
 		}
-
 		return next(c)
-
 	}
 }
 

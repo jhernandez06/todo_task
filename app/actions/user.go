@@ -2,6 +2,7 @@ package actions
 
 import (
 	"TodoList/app/models"
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
@@ -58,7 +59,7 @@ func CreateUserByAdmin(c buffalo.Context) error {
 		return c.Render(http.StatusOK, r.HTML("user/newByAdmin.plush.html"))
 	}
 	c.Flash().Add("success", "user created successfully")
-	return c.Redirect(http.StatusSeeOther, "/tasks")
+	return c.Redirect(http.StatusSeeOther, "/user/list")
 }
 func UsersList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
@@ -125,17 +126,25 @@ func UpdateUser(c buffalo.Context) error {
 }
 func DestroyUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
+	path := "/user/list"
 	user := models.User{}
 	userID, _ := uuid.FromString(c.Param("user_id"))
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "no user found with that ID")
 		return c.Redirect(404, "/user/list")
 	}
+	if user.ID == currentUser.ID {
+		fmt.Println("POR AQUI PASE  *********")
+		c.Session().Clear()
+		path = "/"
+	}
 	if err := tx.Destroy(&user); err != nil {
 		return err
 	}
+
 	c.Flash().Add("success", "user destroyed successfully")
-	return c.Redirect(http.StatusSeeOther, "/user/list")
+	return c.Redirect(http.StatusSeeOther, path)
 }
 
 func UpdateUserActive(c buffalo.Context) error {
