@@ -4,10 +4,15 @@
     <p class="lead">FirstName: <%= user.FirstName %></p>
     <p class="lead">last Name: <%= user.LastName %></p>
     <p class="lead">Email: <%= user.Email %></p>
+    <p class="lead">Rol: <%= user.Rol %></p>
     <hr class="my-4">
     <div class="d-flex justify-content-between">
         <div >
-            <a class="btn btn-light py-2 px-4 btn-lg text-dark" href="/tasks" role="button">Back</a>
+            <%= if (current_user.Rol == "admin") { %>
+                <a class="btn btn-light py-2 px-4 btn-lg text-dark" href="/user/list" role="button">Back</a>
+            <% } else{  %>
+                <a class="btn btn-light py-2 px-4 btn-lg text-dark" href="/tasks" role="button">Back</a>
+            <% } %>
         </div>
         <div>
             <a class="btn btn-primary btn-lg px-4" href="/user/edit/<%= user.ID %>" ="button">Edit</a>

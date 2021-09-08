@@ -23,7 +23,7 @@ func TasksList(c buffalo.Context) error {
 	}
 
 	tasks := models.Tasks{}
-	if err := q.Order("limit_data asc").All(&tasks); err != nil {
+	if err := q.Order("priority asc").Order("limit_data asc").All(&tasks); err != nil {
 		return err
 	}
 
@@ -36,8 +36,8 @@ func NewTask(c buffalo.Context) error {
 	currentUser := c.Value("current_user").(*models.User)
 	users := models.Users{}
 	user := models.User{}
+	q := tx.Q()
 	if currentUser.Rol == "admin" {
-		q := tx.Q()
 		q.Where("status_user = ?", "activated")
 		if err := q.Order("first_name asc").All(&users); err != nil {
 			return err
@@ -56,6 +56,7 @@ func NewTask(c buffalo.Context) error {
 		c.Set("task", models.Task{})
 		return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
 	}
+	//q.Where("priority = ?", task.Priority)
 	c.Set("user", user)
 	c.Set("task", models.Task{})
 	return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
@@ -119,6 +120,7 @@ func CreateTask(c buffalo.Context) error {
 
 func ShowTask(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	task := models.Task{}
 	user := models.User{}
 	taskID, _ := uuid.FromString(c.Param("task_id"))
@@ -129,6 +131,10 @@ func ShowTask(c buffalo.Context) error {
 	if err := tx.Find(&user, task.UserID); err != nil {
 		return err
 	}
+	if currentUser.Rol == "user" && currentUser.ID != task.UserID {
+		c.Flash().Add("danger", "You are not authorized to view that page.")
+		return c.Redirect(302, "/tasks")
+	}
 	c.Set("user", user)
 	c.Set("task", task)
 	return c.Render(http.StatusOK, r.HTML("task/show.plush.html"))
@@ -136,12 +142,11 @@ func ShowTask(c buffalo.Context) error {
 
 func EditTask(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	task := models.Task{}
 	users := models.Users{}
 	user := models.User{}
-
 	taskID := c.Param("task_id")
-
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
 		return c.Redirect(http.StatusNotFound, "tasks/")
@@ -159,6 +164,10 @@ func EditTask(c buffalo.Context) error {
 		}
 		UsersList = append(UsersList, oneUser)
 	}
+	if currentUser.Rol == "user" && currentUser.ID != task.UserID {
+		c.Flash().Add("danger", "You are not authorized to view that page.")
+		return c.Redirect(302, "/tasks")
+	}
 	c.Set("usersList", UsersList)
 	c.Set("user", user)
 	c.Set("users", users)
@@ -168,6 +177,7 @@ func EditTask(c buffalo.Context) error {
 
 func UpdateTask(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	task := models.Task{}
 	taskID := c.Param("task_id")
 	users := models.Users{}
@@ -200,6 +210,10 @@ func UpdateTask(c buffalo.Context) error {
 		c.Set("users", users)
 		return c.Render(http.StatusSeeOther, r.HTML("task/edit.plush.html"))
 	}
+	if currentUser.Rol == "user" && currentUser.ID != task.UserID {
+		c.Flash().Add("danger", "You are not authorized to view that page.")
+		return c.Redirect(302, "/tasks")
+	}
 	if err := tx.Update(&task); err != nil {
 		return err
 	}
@@ -209,11 +223,16 @@ func UpdateTask(c buffalo.Context) error {
 
 func DestroyTask(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	task := models.Task{}
 	taskID, _ := uuid.FromString(c.Param("task_id"))
 	if err := tx.Find(&task, taskID); err != nil {
 		c.Flash().Add("danger", "no task found with that ID")
 		return c.Redirect(404, "/tasks")
+	}
+	if currentUser.Rol == "user" && currentUser.ID != task.UserID {
+		c.Flash().Add("danger", "You are not authorized")
+		return c.Redirect(302, "/tasks")
 	}
 	if err := tx.Destroy(&task); err != nil {
 		return err
@@ -224,6 +243,7 @@ func DestroyTask(c buffalo.Context) error {
 
 func UpdateTaskCheck(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	task := models.Task{}
 	taskID := c.Param("task_id")
 	if err := tx.Find(&task, taskID); err != nil {
@@ -231,6 +251,10 @@ func UpdateTaskCheck(c buffalo.Context) error {
 	}
 	if err := c.Bind(&task); err != nil {
 		return err
+	}
+	if currentUser.Rol == "user" && currentUser.ID != task.UserID {
+		c.Flash().Add("danger", "You are not authorized")
+		return c.Redirect(302, "/tasks")
 	}
 	if !(task.CheckComplet) {
 		task.CheckComplet = true

@@ -56,8 +56,9 @@ func AuthCreate(c buffalo.Context) error {
 		verrs.Add("email", "invited, add password")
 		c.Set("errors", verrs)
 		c.Set("user", u)
-		return c.Render(http.StatusUnauthorized, r.HTML("user/edit.plush.html"))
+		return c.Render(http.StatusUnauthorized, r.HTML("user/password.plush.html"))
 	}
+	fmt.Println(u.StatusUser)
 	if u.StatusUser == "invited" {
 		return invited()
 	}

@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 INSERT INTO users 
 (id,first_name,last_name,email,status_user,rol,password_hash,created_at,updated_at) 
 VALUES 

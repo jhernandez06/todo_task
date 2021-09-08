@@ -22,7 +22,6 @@ func NewUserByAdmin(c buffalo.Context) error {
 	c.Set("user", models.User{})
 	return c.Render(http.StatusOK, r.HTML("user/newByAdmin.plush.html"))
 }
-
 func CreateUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	user := models.User{}
@@ -75,31 +74,56 @@ func UsersList(c buffalo.Context) error {
 }
 func ShowUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
 		return c.Redirect(http.StatusNotFound, "/user/list")
 	}
+	if currentUser.Rol == "user" && currentUser.ID != user.ID {
+		c.Flash().Add("danger", "You are not authorized.")
+		return c.Redirect(302, "/tasks")
+	}
 	c.Set("user", user)
 	return c.Render(http.StatusOK, r.HTML("user/show.plush.html"))
 }
 func EditUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "a user with that ID was not found")
 		return c.Redirect(http.StatusNotFound, "/user/list")
 	}
+	if currentUser.Rol == "user" && currentUser.ID != user.ID {
+		c.Flash().Add("danger", "You are not authorized.")
+		return c.Redirect(302, "/tasks")
+	}
+	c.Set("user", user)
+	return c.Render(http.StatusOK, r.HTML("user/edit.plush.html"))
+}
+func PasswordUser(c buffalo.Context) error {
+	tx := c.Value("tx").(*pop.Connection)
+	user := models.User{}
+	userID := c.Param("user_id")
+	if err := tx.Find(&user, userID); err != nil {
+		c.Flash().Add("danger", "a user with that ID was not found")
+		return c.Redirect(http.StatusNotFound, "/")
+	}
 	c.Set("user", user)
 	return c.Render(http.StatusOK, r.HTML("user/edit.plush.html"))
 }
 func UpdateUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
-	// currentUser := c.Value("current_user").(*models.User)
+	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
+	if currentUser.Rol == "user" && currentUser.ID.String() != userID {
+		c.Flash().Add("danger", "You are not authorized.")
+		return c.Redirect(302, "/tasks")
+	}
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "a user with that ID was not found")
 		return c.Redirect(404, "/user/list")
@@ -107,13 +131,8 @@ func UpdateUser(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-	fmt.Println("*********HASTA AQUI BIEN*********")
-	if user.StatusUser == "invited" {
-		fmt.Println("*******CONDICIONAL**********")
-		user.StatusUser = "activated"
-	}
 	fmt.Println(user.StatusUser)
-	verrs, err := user.Update(tx)
+	verrs, err := user.Validate(tx)
 	if err != nil {
 		return err
 	}
@@ -122,16 +141,43 @@ func UpdateUser(c buffalo.Context) error {
 		c.Set("user", user)
 		return c.Render(http.StatusSeeOther, r.HTML("user/edit.plush.html"))
 	}
-	// if err := tx.Update(&user); err != nil {
-	// 	return err
-	// }
+
+	if err := tx.Update(&user); err != nil {
+		return err
+	}
 
 	c.Flash().Add("success", "user updated successfully")
-	// if currentUser.Rol == "admin" {
-	// 	return c.Redirect(http.StatusSeeOther, "/user/list")
-	// }
+	if currentUser.Rol == "admin" {
+		return c.Redirect(http.StatusSeeOther, "/user/list")
+	}
+	return c.Redirect(http.StatusSeeOther, "/tasks")
+}
+func UpdateUserPassword(c buffalo.Context) error {
+	tx := c.Value("tx").(*pop.Connection)
+	user := models.User{}
+	userID := c.Param("user_id")
+	fmt.Println(userID)
+	if err := tx.Find(&user, userID); err != nil {
+		c.Flash().Add("danger", "a user with that ID was not found")
+		return c.Redirect(404, "/user/list")
+	}
+	if err := c.Bind(&user); err != nil {
+		return err
+	}
+	if user.StatusUser == "invited" {
+		user.StatusUser = "activated"
+	}
+	verrs, err := user.Update(tx)
+	if err != nil {
+		return err
+	}
+	if verrs.HasAny() {
+		c.Set("errors", verrs)
+		c.Set("user", user)
+		return c.Render(http.StatusSeeOther, r.HTML("user/password.plush.html"))
+	}
+	c.Flash().Add("success", "user registration completed successfully")
 	return c.Redirect(http.StatusSeeOther, "/")
-
 }
 func DestroyUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
@@ -144,8 +190,9 @@ func DestroyUser(c buffalo.Context) error {
 		return c.Redirect(404, "/user/list")
 	}
 	if user.ID == currentUser.ID {
-		c.Session().Clear()
-		path = "/"
+		//c.Session().Clear()
+		c.Flash().Add("info", "an administrator can only be deleted or inactivated by another administrator")
+		return c.Redirect(http.StatusSeeOther, "/user/list")
 	}
 	if err := tx.Destroy(&user); err != nil {
 		return err
@@ -154,9 +201,9 @@ func DestroyUser(c buffalo.Context) error {
 	c.Flash().Add("success", "user destroyed successfully")
 	return c.Redirect(http.StatusSeeOther, path)
 }
-
 func UpdateUserActive(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
 	if err := tx.Find(&user, userID); err != nil {
@@ -167,6 +214,10 @@ func UpdateUserActive(c buffalo.Context) error {
 	}
 	if user.StatusUser == "invited" {
 		c.Flash().Add("info", "the user has not assigned a password")
+	}
+	if user.ID == currentUser.ID {
+		c.Flash().Add("info", "an administrator can only be deleted or inactivated by another administrator")
+		return c.Redirect(http.StatusSeeOther, "/user/list")
 	}
 	if user.StatusUser == "disabled" {
 		user.StatusUser = "activated"

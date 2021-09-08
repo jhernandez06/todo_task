@@ -31,8 +31,7 @@ package models1
 // 	u := &User{
 // 		Password: "password",
 // 	}
-
-// 	ms.Zero(u.PasswordHash)
+//	ms.Zero(u.PasswordHash)
 
 // 	verrs, err := u.Create(ms.DB)
 // 	ms.NoError(err)

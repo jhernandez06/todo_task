@@ -66,6 +66,12 @@ a:hover{
 .logo:hover{
     color: #1D4564
 }
+.centered{
+    top:50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
 
 
 

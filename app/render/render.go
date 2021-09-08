@@ -3,7 +3,6 @@ package render
 import (
 	base "TodoList"
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/gobuffalo/buffalo/render"
@@ -31,8 +30,7 @@ var Helpers = map[string]interface{}{
 	"status":        CheckStatus,
 	"addTask":       AddTask,
 	"byCompleted":   Completed,
-	"isValidID":     IsValidUUID,
-	"roleUser":      RoleUser,
+	"priority":      Priority,
 }
 
 func Status(completed bool, date time.Time, dateUpdate time.Time) string {
@@ -80,14 +78,14 @@ func Completed(x string) string {
 	}
 	return y
 }
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
-}
-func RoleUser(role string) string {
-	var show string
-	if role != "admin" {
-		show = "d-none"
+func Priority(priority string) string {
+	var flag string
+	if priority == "a" {
+		flag = "danger"
+	} else if priority == "b" {
+		flag = "warning"
+	} else if priority == "c" {
+		flag = "success"
 	}
-	return show
+	return flag
 }

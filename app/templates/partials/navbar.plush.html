@@ -17,11 +17,12 @@
       </div>
     </div>
     <div class="container w-50 d-flex justify-content-end"> 
-      <a 
-        class="nav-link text-light <%= roleUser(current_user.Rol) %> "
+      <%= if (current_user.Rol == "admin") { %>
+        <a 
+        class="nav-link text-light"
         href="/user/list"
         >Users</a
-      >
+      > <% } %>
       <a id="incomplete" class="nav-link text-light  <%= status(params["check_complet"],"true")%>" href="/tasks/?check_complet=false"
         >Incomplete Tasks 
       </a>

@@ -58,3 +58,10 @@ func TestAddTask(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestCompleted(t *testing.T) {
+	if completed := render.Completed("true"); completed != "d" {
+		t.Error("Error")
+		t.Fail()
+	}
+}

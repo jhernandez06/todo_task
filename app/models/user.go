@@ -53,7 +53,6 @@ func (u *User) CreateByAdmin(tx *pop.Connection) (*validate.Errors, error) {
 }
 func (u *User) Update(tx *pop.Connection) (*validate.Errors, error) {
 	u.Email = strings.ToLower(u.Email)
-	//u.Rol = "user"
 	ph, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return validate.NewErrors(), errors.WithStack(err)
@@ -103,8 +102,20 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		&validators.FuncValidator{
 			Field:   u.Email,
 			Name:    "Email",
+			Message: "%s is an invalid Email",
+			Fn: func() bool {
+				if u.Email != strings.ToLower(u.Email) {
+					return false
+				}
+				return true
+			},
+		},
+		&validators.FuncValidator{
+			Field:   u.Email,
+			Name:    "Email",
 			Message: "%s is already taken",
 			Fn: func() bool {
+
 				var b bool
 				q := tx.Where("email = ?", u.Email)
 				if u.ID != uuid.Nil {

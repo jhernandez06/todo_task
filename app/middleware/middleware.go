@@ -72,12 +72,17 @@ func TimeMW(next buffalo.Handler) buffalo.Handler {
 func EditTaskMW(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		tx := models.DB()
+		currentUser := c.Value("current_user").(*models.User)
 		task := models.Task{}
 		taskID := c.Param("task_id")
 		tx.Find(&task, taskID)
+		if currentUser.Rol == "user" && currentUser.ID != task.UserID {
+			c.Flash().Add("danger", "You must be authorized")
+			c.Redirect(http.StatusSeeOther, "/tasks")
+		}
 		if task.CheckComplet {
 			c.Flash().Add("danger", "cannot edit a completed task")
-			c.Redirect(http.StatusSeeOther, "/")
+			c.Redirect(http.StatusSeeOther, "/tasks")
 		}
 		return next(c)
 	}
@@ -92,6 +97,7 @@ func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
 			tx := c.Value("tx").(*pop.Connection)
 			err := tx.Find(u, uid)
 			if err != nil {
+				c.Session().Clear()
 				return errors.WithStack(err)
 			}
 			c.Set("current_user", u)
@@ -123,7 +129,7 @@ func Admin(next buffalo.Handler) buffalo.Handler {
 		if ok && user.Rol == "admin" {
 			return next(c)
 		}
-		c.Flash().Add("danger", "You are not authorized to view that page.")
+		c.Flash().Add("danger", "You are not authorized.")
 		return c.Redirect(302, "/tasks")
 	}
 }
@@ -134,7 +140,21 @@ func Active(next buffalo.Handler) buffalo.Handler {
 		if ok && user.StatusUser == "activated" {
 			return next(c)
 		}
-		c.Flash().Add("danger", "You are not activated to create tasks.")
-		return c.Redirect(302, "/tasks")
+		c.Session().Clear()
+		c.Flash().Add("danger", "inactive user")
+		return c.Redirect(302, "/")
+	}
+}
+func Invited(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		user, ok := c.Value("current_user").(*models.User)
+		if ok && user.StatusUser == "invited" {
+			return next(c)
+		} else if user.StatusUser == "activated" || user.StatusUser == "disabled" {
+			c.Flash().Add("danger", "You are not authorized to view that page.")
+			return c.Redirect(302, "/tasks")
+		}
+		c.Flash().Add("danger", "You are not authorized to view that page.")
+		return c.Redirect(302, "/")
 	}
 }

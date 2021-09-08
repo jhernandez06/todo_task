@@ -54,6 +54,20 @@ func (t *Task) Validate(tx *pop.Connection) *validate.Errors {
 		&validators.StringIsPresent{Field: t.Description, Name: "Description"},
 		&validators.UUIDIsPresent{Name: "UserID", Field: t.UserID, Message: "UserID"},
 		&UserIDNotFound{Name: "UserID", Field: t.UserID, tx: tx},
+		&validators.FuncValidator{
+			Field:   t.Priority,
+			Name:    "Priority",
+			Message: "%s is an invalid priority",
+			Fn: func() bool {
+				priorities := [3]string{"a", "b", "c"}
+				for _, p := range priorities {
+					if t.Priority == p {
+						return true
+					}
+				}
+				return false
+			},
+		},
 		// &validators.FuncValidator{
 		// 	Name:    "UserID",
 		// 	Message: "%v Not Valid!",

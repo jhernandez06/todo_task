@@ -51,7 +51,7 @@
           <td>
             <span
               ><a class="text-task" href="/tasks/show/<%= task.ID %>"
-                ><%= task.Title %></a
+                ><%= task.Title %> <span class="text-<%= priority(task.Priority)%> "><i class="fas fa-flag"></i></span></a
               ></span
             >
           </td>
