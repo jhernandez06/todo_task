@@ -7,14 +7,33 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/validate/v3"
 	"github.com/gofrs/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
+func EditPassword(c buffalo.Context) error {
+	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
+	user := models.User{}
+	userID := c.Param("user_id")
+	if err := tx.Find(&user, userID); err != nil {
+		c.Flash().Add("danger", "a user with that ID was not found")
+		return c.Redirect(http.StatusNotFound, "/user/list")
+	}
+	if currentUser.ID != user.ID {
+		c.Flash().Add("danger", "You are not authorized.")
+		return c.Redirect(302, "/tasks")
+	}
+	c.Set("user", user)
+	return c.Render(http.StatusOK, r.HTML("/user/changePassword.plush.html"))
+}
 func Index(c buffalo.Context) error {
 	c.Set("user", models.User{})
 	return c.Render(http.StatusOK, r.HTML("user/index.plush.html"))
 }
 func NewUser(c buffalo.Context) error {
+
 	c.Set("user", models.User{})
 	return c.Render(http.StatusOK, r.HTML("user/new.plush.html"))
 }
@@ -64,18 +83,23 @@ func CreateUserByAdmin(c buffalo.Context) error {
 }
 func UsersList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	q := tx.PaginateFromParams(c.Params())
 	users := models.Users{}
 
-	if err := tx.Order("first_name asc").All(&users); err != nil {
+	if err := q.Order("rol,first_name").All(&users); err != nil {
 		return err
 	}
 	c.Set("users", users)
+	c.Set("pagination", q.Paginator)
 	return c.Render(http.StatusOK, r.HTML("user/list.plush.html"))
 }
 func ShowUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
+	tasksC := models.Tasks{}
+	tasksI := models.Tasks{}
+
 	userID := c.Param("user_id")
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "a task with that ID was not found")
@@ -85,7 +109,20 @@ func ShowUser(c buffalo.Context) error {
 		c.Flash().Add("danger", "You are not authorized.")
 		return c.Redirect(302, "/tasks")
 	}
+	q := tx.Q()
+	p := tx.Q()
+	q.Where("check_complet = false").Where("user_id = ?", user.ID)
+	if err := q.All(&tasksC); err != nil {
+		return err
+	}
+	p.Where("check_complet = true").Where("user_id = ?", user.ID)
+	if err := p.All(&tasksI); err != nil {
+		return err
+	}
+	c.Set("tasksC", len(tasksI))
+	c.Set("tasksI", len(tasksC))
 	c.Set("user", user)
+
 	return c.Render(http.StatusOK, r.HTML("user/show.plush.html"))
 }
 func EditUser(c buffalo.Context) error {
@@ -152,7 +189,7 @@ func UpdateUser(c buffalo.Context) error {
 	}
 	return c.Redirect(http.StatusSeeOther, "/tasks")
 }
-func UpdateUserPassword(c buffalo.Context) error {
+func AddPassword(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	user := models.User{}
 	userID := c.Param("user_id")
@@ -179,6 +216,50 @@ func UpdateUserPassword(c buffalo.Context) error {
 	c.Flash().Add("success", "user registration completed successfully")
 	return c.Redirect(http.StatusSeeOther, "/")
 }
+func UpdatePassword(c buffalo.Context) error {
+	tx := c.Value("tx").(*pop.Connection)
+	currentUser := c.Value("current_user").(*models.User)
+	user := models.User{}
+	userID := c.Param("user_id")
+	fmt.Println(userID)
+	if err := tx.Find(&user, userID); err != nil {
+		c.Flash().Add("danger", "a user with that ID was not found")
+		return c.Redirect(404, "/user/list")
+	}
+	if currentUser.ID != user.ID {
+		c.Flash().Add("danger", "You are not authorized.")
+		return c.Redirect(302, "/tasks")
+	}
+	equal := func() error {
+		verrs := validate.NewErrors()
+		verrs.Add("password", "use a different password than the current one")
+		c.Set("errors", verrs)
+		c.Set("user", user)
+		return c.Render(http.StatusUnauthorized, r.HTML("user/changePassword.plush.html"))
+	}
+	if err := c.Bind(&user); err != nil {
+		return err
+	}
+	// confirm that the given password matches the hashed password from the db
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(user.Password))
+	if err == nil {
+		fmt.Println("--------------------> contraseña igual a la anterior")
+		return equal()
+	}
+
+	verrs, err := user.Update(tx)
+	if err != nil {
+		return err
+	}
+	if verrs.HasAny() {
+		c.Set("errors", verrs)
+		c.Set("user", user)
+		return c.Render(http.StatusSeeOther, r.HTML("user/changePassword.plush.html"))
+	}
+	c.Flash().Add("success", "the password was changed successfully")
+	return c.Redirect(http.StatusSeeOther, "/tasks")
+}
+
 func DestroyUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	currentUser := c.Value("current_user").(*models.User)

@@ -1,11 +1,16 @@
 <%= partial("partials/navbar.plush.html") %>
-<div class="jumbotron mt-5 container w-75">
-    <h1 class="display-4">User details</h1>
-    <p class="lead">FirstName: <%= user.FirstName %></p>
-    <p class="lead">last Name: <%= user.LastName %></p>
-    <p class="lead">Email: <%= user.Email %></p>
-    <p class="lead">Rol: <%= user.Rol %></p>
-    <hr class="my-4">
+<div class="jumbotron mt-5 container w-50">
+    <h1 class="display-4 text-center">User details</h1>
+        <p class="lead">FirstName: <%= user.FirstName %></p>
+        <p class="lead">last Name: <%= user.LastName %></p>
+        <p class="lead">Email: <%= user.Email %></p>
+        <p class="lead">Rol: <%= user.Rol %></p>
+
+    <%= if (current_user.Rol == "admin") {%>
+        <p class="lead">Tasks Completed: <%= tasksI %></p>
+        <p class="lead">Tasks Completed: <%= tasksC %></p>
+    <% } %>
+   <hr class="my-4">
     <div class="d-flex justify-content-between">
         <div >
             <%= if (current_user.Rol == "admin") { %>
@@ -15,9 +20,24 @@
             <% } %>
         </div>
         <div>
-            <a class="btn btn-primary btn-lg px-4" href="/user/edit/<%= user.ID %>" ="button">Edit</a>
+            <%= if (equalsID(current_user.ID,user.ID)) {%>
+                <div class="dropdown">
+                    <a class="btn btn-primary btn-lg px-4 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                     Edit
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                      <a class="dropdown-item" href="/user/edit/<%= user.ID %>">Edit Information</a>   
+                      <a class="dropdown-item" href="/user/changePassword/<%= user.ID %>">Change Password</a>
+                      
+                    </div>
+                  </div>
+             <% } else{ %>
+                <a class="btn btn-primary btn-lg px-4" href="/user/edit/<%= user.ID %>" ="button">Edit</a>
+                <% } %>
         </div>
-           
+            
     </div>
     
   </div>
+  
+ 

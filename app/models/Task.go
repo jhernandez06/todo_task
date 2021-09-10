@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"time"
 
@@ -19,7 +20,7 @@ type Task struct {
 	Description  string    `json:"description" db:"description"`
 	CheckComplet bool      `json:"check_complet" db:"check_complet"`
 	Priority     string    `json:"priority" db:"priority"`
-	UserID       uuid.UUID `json:"user_id" db:"user_id"`
+	UserID       uuid.UUID `json:"user_id" pg:"type:uuid" db:"user_id" `
 	User         User      `belongs_to:"user"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
@@ -54,6 +55,7 @@ func (t *Task) Validate(tx *pop.Connection) *validate.Errors {
 		&validators.StringIsPresent{Field: t.Description, Name: "Description"},
 		&validators.UUIDIsPresent{Name: "UserID", Field: t.UserID, Message: "UserID"},
 		&UserIDNotFound{Name: "UserID", Field: t.UserID, tx: tx},
+		&UserIDNotValid{Name: "UserID", Field: t.UserID, tx: tx},
 		&validators.FuncValidator{
 			Field:   t.Priority,
 			Name:    "Priority",
@@ -68,18 +70,6 @@ func (t *Task) Validate(tx *pop.Connection) *validate.Errors {
 				return false
 			},
 		},
-		// &validators.FuncValidator{
-		// 	Name:    "UserID",
-		// 	Message: "%v Not Valid!",
-		// 	Fn: func() bool {
-		// 		if t.UserID.String() == "" {
-		// 			return true
-		// 		}
-		// 		re := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
-		// 		return re.MatchString(t.UserID.String())
-		// 		//return (len(re.FindAllString(t.UserID.String(), -1)) == 0)
-		// 	},
-		// },
 	)
 }
 
@@ -106,7 +96,7 @@ func (v *UserIDNotFound) IsValid(errors *validate.Errors) {
 	queryUser := User{}
 	err := query.First(&queryUser)
 	if err != nil {
-		errors.Add(validators.GenerateKey(v.Name), "UserID not found")
+		errors.Add(validators.GenerateKey(v.Name), "invalid user")
 	}
 }
 
@@ -118,9 +108,12 @@ type UserIDNotValid struct {
 
 func (v *UserIDNotValid) IsValid(errors *validate.Errors) {
 	id := IsValidUUID(v.Field.String())
-	if !id {
-		errors.Add(validators.GenerateKey(v.Name), "ID not valid!")
-	} else if len(v.Field.String()) != 36 {
+	fmt.Println("--------------------> ID", id)
+	fmt.Println(len(v.Field.String()))
+	// if id {
+	// 	errors.Add(validators.GenerateKey(v.Name), "ID not valid!")
+	// } else
+	if len(v.Field.String()) != 36 {
 		errors.Add(validators.GenerateKey(v.Name), "ID not valid!")
 	}
 }

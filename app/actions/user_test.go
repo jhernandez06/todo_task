@@ -276,7 +276,6 @@ func (as *ActionSuite) Test_User_Password() {
 	resp = as.HTML("/signin").Post(u)
 	body := resp.Body.String()
 	as.Contains(body, "Add Password")
-
 }
 
 func (as *ActionSuite) Test_Update_Password_User() {

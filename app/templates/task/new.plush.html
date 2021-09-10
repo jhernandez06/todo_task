@@ -10,7 +10,7 @@
     </div>
     <div class="mb-3"><%= f.TextArea("Description") %></div>
     <div class="mb-3 grid-form">
-        <%= f.SelectTag("Priority", {label:"Select a priority", options: {"High priority": "a", "Moderate priority": "b", "Low priority": "c"} }) %>
+        <%= f.SelectTag("Priority", {label:"Select a priority", options: {"High priority": "a", "Moderate priority": "b", "Low priority": "c"}, value: "a" }) %>
         <%= if (current_user.Rol == "admin") { %>
         <%= f.SelectTag("UserID", {label:"Select a User", options: usersList }) %>
         <% } %>

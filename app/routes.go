@@ -41,13 +41,15 @@ func setRoutes(root *buffalo.App) {
 	root.GET("/user/show/{user_id}", actions.ShowUser)
 	root.GET("/user/delete/{user_id}", middleware.Admin(actions.DestroyUser))
 	root.GET("/user/edit/{user_id}", actions.EditUser)
+	root.GET("/user/changePassword/{user_id}", actions.EditPassword)
 	root.GET("/user/password", middleware.Invited(actions.PasswordUser))
-	root.PUT("/user/updatePassword/{user_id}", actions.UpdateUserPassword)
+	root.PUT("/user/addPassword/{user_id}", middleware.Invited(actions.AddPassword))
+	root.PUT("/user/updatePassword/{user_id}", actions.UpdatePassword)
 	root.PUT("/user/update/{user_id}", actions.UpdateUser)
 	root.PUT("/user/active/{user_id}", middleware.Admin(actions.UpdateUserActive))
 
 	root.Middleware.Skip(middleware.SetCurrentUser, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser)
-	root.Middleware.Skip(middleware.Authorize, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser, actions.UpdateUserPassword)
-	root.Middleware.Skip(middleware.Active, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser, actions.PasswordUser, actions.UpdateUserPassword)
+	root.Middleware.Skip(middleware.Authorize, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser, actions.AddPassword)
+	root.Middleware.Skip(middleware.Active, actions.Index, actions.AuthCreate, actions.AuthDestroy, actions.NewUser, actions.CreateUser, actions.PasswordUser, actions.AddPassword)
 	root.ServeFiles("/", base.Assets)
 }

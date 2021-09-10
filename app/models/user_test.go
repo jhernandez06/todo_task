@@ -1,6 +1,8 @@
 package models_test
 
-import "TodoList/app/models"
+import (
+	"TodoList/app/models"
+)
 
 func (ms *ModelSuite) Test_User_Create() {
 	count, err := ms.DB.Count("users")
@@ -101,8 +103,10 @@ func (ms *ModelSuite) Test_Update_Password() {
 	if err := ms.DB.Create(u); err != nil {
 		ms.Fail("Fail")
 	}
+
 	ms.Zero(u.PasswordHash)
 	u = &models.User{
+		ID:                   u.ID,
 		FirstName:            "Abby",
 		LastName:             "Dog",
 		Email:                "abby@gmail.com",
@@ -117,4 +121,39 @@ func (ms *ModelSuite) Test_Update_Password() {
 	ms.NotZero(u.PasswordHash)
 	ms.False(verrsUpdate.HasAny())
 	ms.NotZero(u.PasswordHash)
+}
+func (ms *ModelSuite) Test_User_CreateByAdmin() {
+	count, err := ms.DB.Count("users")
+	ms.NoError(err)
+	ms.Equal(0, count)
+	u := &models.User{
+		FirstName:            "Javier",
+		LastName:             "Hernandez",
+		Email:                "javier@gmail.com",
+		Rol:                  "superAdmin",
+		StatusUser:           "activated",
+		Password:             "javier",
+		PasswordConfirmation: "javier"}
+	verrs, err := u.CreateByAdmin(ms.DB)
+	ms.NoError(err)
+	ms.True(verrs.HasAny())
+	count, err = ms.DB.Count("users")
+	ms.NoError(err)
+	ms.Equal(0, count)
+
+	u1 := &models.User{
+		FirstName:            "Javier",
+		LastName:             "Hernandez",
+		Email:                "javier@gmail.com",
+		Rol:                  "admin",
+		StatusUser:           "activated",
+		Password:             "javier",
+		PasswordConfirmation: "javier"}
+
+	verrs, err = u1.CreateByAdmin(ms.DB)
+	ms.NoError(err)
+	ms.False(verrs.HasAny())
+	count1, err := ms.DB.Count("users")
+	ms.NoError(err)
+	ms.Equal(1, count1)
 }

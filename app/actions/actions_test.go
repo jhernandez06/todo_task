@@ -29,6 +29,7 @@ func (as *ActionSuite) CreateUser() *models.User {
 		Password:             "javier",
 		PasswordConfirmation: "javier",
 	}
+
 	verrs, err := user.CreateByAdmin(as.DB)
 	as.NoError(err)
 	as.False(verrs.HasAny())

@@ -15,7 +15,7 @@ import (
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID                   uuid.UUID `json:"id" db:"id"`
+	ID                   uuid.UUID `json:"id" db:"id" pg:"type:uuid"`
 	FirstName            string    `json:"first_name" db:"first_name"`
 	LastName             string    `json:"last_name" db:"last_name"`
 	Email                string    `json:"email" db:"email"`

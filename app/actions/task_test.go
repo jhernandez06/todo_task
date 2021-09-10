@@ -150,7 +150,6 @@ func (as *ActionSuite) Test_Task_Edit() {
 	as.Equal(303, res2.Code)
 	res3 := as.HTML("/tasks/edit/{javier}").Get()
 	as.Equal(404, res3.Code)
-
 }
 
 func (as *ActionSuite) Test_Task_Update() {

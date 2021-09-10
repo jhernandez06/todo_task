@@ -2,18 +2,21 @@ package actions
 
 import (
 	"TodoList/app/models"
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
 )
 
 func TasksList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
+	tasks := models.Tasks{}
 	currentUser := c.Value("current_user").(*models.User)
 	status := c.Param("check_complet")
-	q := tx.Q()
+	q := tx.PaginateFromParams(c.Params())
 
 	if status == "true" || status == "false" {
 		q.Where("check_complet = ?", status)
@@ -22,12 +25,12 @@ func TasksList(c buffalo.Context) error {
 		q.Where("user_id = ?", currentUser.ID)
 	}
 
-	tasks := models.Tasks{}
 	if err := q.Order("priority asc").Order("limit_data asc").All(&tasks); err != nil {
 		return err
 	}
 
 	c.Set("tasks", tasks)
+	c.Set("paginationTasks", q.Paginator)
 	return c.Render(http.StatusOK, r.HTML("task/index.plush.html"))
 }
 
@@ -56,7 +59,6 @@ func NewTask(c buffalo.Context) error {
 		c.Set("task", models.Task{})
 		return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
 	}
-	//q.Where("priority = ?", task.Priority)
 	c.Set("user", user)
 	c.Set("task", models.Task{})
 	return c.Render(http.StatusOK, r.HTML("task/new.plush.html"))
@@ -74,6 +76,7 @@ func CreateTask(c buffalo.Context) error {
 		return err
 	}
 	if currentUser.Rol == "admin" {
+
 		UsersList := []map[string]interface{}{}
 		for _, user := range users {
 			oneUser := map[string]interface{}{
@@ -81,9 +84,12 @@ func CreateTask(c buffalo.Context) error {
 			}
 			UsersList = append(UsersList, oneUser)
 		}
+
 		if err := c.Bind(&task); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
+		fmt.Println("--------------> in if", task.UserID)
+
 		verrs := task.Validate(tx)
 		if verrs.HasAny() {
 			c.Set("errors", verrs)

@@ -16,7 +16,6 @@ func (as *ActionSuite) Test_Auth_Create() {
 	resp3 := as.HTML("/signin").Post(u3)
 	as.Equal(401, resp3.Code)
 	count, err = as.DB.Count("users")
-
 	as.NoError(err)
 	as.Equal(3, count)
 }
@@ -32,5 +31,4 @@ func (as *ActionSuite) Test_Auth_Destroy() {
 	as.Equal(302, resp.Code)
 	respShow = as.HTML("/user/show/{%s}", user.ID).Get()
 	as.Equal(302, respShow.Code)
-
 }

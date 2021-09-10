@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/buffalo/render"
+	"github.com/gofrs/uuid"
 )
 
 // Engine for rendering across the app, it provides
@@ -31,6 +32,7 @@ var Helpers = map[string]interface{}{
 	"addTask":       AddTask,
 	"byCompleted":   Completed,
 	"priority":      Priority,
+	"equalsID":      EqualsID,
 }
 
 func Status(completed bool, date time.Time, dateUpdate time.Time) string {
@@ -88,4 +90,15 @@ func Priority(priority string) string {
 		flag = "success"
 	}
 	return flag
+}
+
+func EqualsID(u1 uuid.UUID, u2 uuid.UUID) bool {
+
+	if u1 == u2 {
+
+		return true
+	}
+
+	return false
+
 }
