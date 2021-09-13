@@ -2,12 +2,12 @@
 <div class="jumbotron mt-5 container w-50">
     <h1 class="display-4 text-center">User details</h1>
         <p class="lead">FirstName: <%= user.FirstName %></p>
-        <p class="lead">last Name: <%= user.LastName %></p>
+        <p class="lead">Last Name: <%= user.LastName %></p>
         <p class="lead">Email: <%= user.Email %></p>
         <p class="lead">Rol: <%= user.Rol %></p>
 
     <%= if (current_user.Rol == "admin") {%>
-        <p class="lead">Tasks Completed: <%= tasksI %></p>
+        <p class="lead">Tasks Incompleted: <%= tasksI %></p>
         <p class="lead">Tasks Completed: <%= tasksC %></p>
     <% } %>
    <hr class="my-4">

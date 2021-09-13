@@ -1,14 +1,17 @@
 package actions
 
 import (
+	"TodoList/app/mailers"
 	"TodoList/app/models"
-	"fmt"
+	"database/sql"
 	"net/http"
+	"strings"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,6 +30,50 @@ func EditPassword(c buffalo.Context) error {
 	}
 	c.Set("user", user)
 	return c.Render(http.StatusOK, r.HTML("/user/changePassword.plush.html"))
+}
+func ForgotPassword(c buffalo.Context) error {
+	c.Set("user", models.User{})
+	return c.Render(http.StatusOK, r.HTML("user/recoverAccount.plush.html"))
+}
+func FindAccount(c buffalo.Context) error {
+	u := &models.User{}
+	if err := c.Bind(u); err != nil {
+		return errors.WithStack(err)
+	}
+	tx := c.Value("tx").(*pop.Connection)
+	// find a user with the email
+	err := tx.Where("email = ?", strings.ToLower(strings.TrimSpace(u.Email))).First(u)
+	// helper function to handle bad attempts
+	bad := func() error {
+		verrs := validate.NewErrors()
+		verrs.Add("email", "email not found")
+		c.Set("errors", verrs)
+		c.Set("user", u)
+		return c.Render(http.StatusUnauthorized, r.HTML("user/recoverAccount.plush.html"))
+	}
+	invited := func() error {
+		verrs := validate.NewErrors()
+		verrs.Add("email", "user invited or disabled")
+		c.Set("errors", verrs)
+		c.Set("user", u)
+		return c.Render(http.StatusUnauthorized, r.HTML("user/recoverAccount.plush.html"))
+	}
+
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			//couldn't find an user with the supplied email address.
+			return bad()
+		}
+
+		return errors.WithStack(err)
+	}
+	if u.StatusUser == "disabled" || u.StatusUser == "invited" {
+		return invited()
+	}
+	c.Set("u", u)
+	mailers.SendMail(c, u)
+	c.Flash().Add("success", "	An email has been sent for you to add your new password ")
+	return c.Redirect(303, "/")
 }
 func Index(c buffalo.Context) error {
 	c.Set("user", models.User{})
@@ -168,7 +215,6 @@ func UpdateUser(c buffalo.Context) error {
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
-	fmt.Println(user.StatusUser)
 	verrs, err := user.Validate(tx)
 	if err != nil {
 		return err
@@ -193,7 +239,6 @@ func AddPassword(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	user := models.User{}
 	userID := c.Param("user_id")
-	fmt.Println(userID)
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "a user with that ID was not found")
 		return c.Redirect(404, "/user/list")
@@ -221,7 +266,6 @@ func UpdatePassword(c buffalo.Context) error {
 	currentUser := c.Value("current_user").(*models.User)
 	user := models.User{}
 	userID := c.Param("user_id")
-	fmt.Println(userID)
 	if err := tx.Find(&user, userID); err != nil {
 		c.Flash().Add("danger", "a user with that ID was not found")
 		return c.Redirect(404, "/user/list")
@@ -237,13 +281,23 @@ func UpdatePassword(c buffalo.Context) error {
 		c.Set("user", user)
 		return c.Render(http.StatusUnauthorized, r.HTML("user/changePassword.plush.html"))
 	}
+	badPassword := func() error {
+		verrs := validate.NewErrors()
+		verrs.Add("password_old", "Incorrect password")
+		c.Set("errors", verrs)
+		c.Set("user", user)
+		return c.Render(http.StatusUnauthorized, r.HTML("user/changePassword.plush.html"))
+	}
 	if err := c.Bind(&user); err != nil {
 		return err
 	}
 	// confirm that the given password matches the hashed password from the db
+	err1 := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(user.PasswordOld))
+	if err1 != nil {
+		return badPassword()
+	}
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(user.Password))
 	if err == nil {
-		fmt.Println("--------------------> contraseña igual a la anterior")
 		return equal()
 	}
 
@@ -259,7 +313,6 @@ func UpdatePassword(c buffalo.Context) error {
 	c.Flash().Add("success", "the password was changed successfully")
 	return c.Redirect(http.StatusSeeOther, "/tasks")
 }
-
 func DestroyUser(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	currentUser := c.Value("current_user").(*models.User)
@@ -278,7 +331,6 @@ func DestroyUser(c buffalo.Context) error {
 	if err := tx.Destroy(&user); err != nil {
 		return err
 	}
-
 	c.Flash().Add("success", "user destroyed successfully")
 	return c.Redirect(http.StatusSeeOther, path)
 }

@@ -15,5 +15,5 @@ var (
 	Assets     = fsbox.New(fs, "public")
 	Templates  = fsbox.New(fs, "app/templates")
 	Migrations = fsbox.New(fs, "migrations")
-	Config     	= fsbox.New(fs, "config")
+	Config     = fsbox.New(fs, "config")
 )

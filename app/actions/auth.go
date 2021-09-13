@@ -76,7 +76,6 @@ func AuthCreate(c buffalo.Context) error {
 	if u.StatusUser == "disabled" {
 		return inactived()
 	}
-
 	msg := fmt.Sprintf("Welcome %s!!", u.FirstName)
 	c.Session().Set("current_user_id", u.ID)
 	c.Flash().Add("success", msg)

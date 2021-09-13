@@ -2,7 +2,6 @@ package actions
 
 import (
 	"TodoList/app/models"
-	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
@@ -25,7 +24,7 @@ func TasksList(c buffalo.Context) error {
 		q.Where("user_id = ?", currentUser.ID)
 	}
 
-	if err := q.Order("priority asc").Order("limit_data asc").All(&tasks); err != nil {
+	if err := q.Order("priority, check_complet, limit_data").All(&tasks); err != nil {
 		return err
 	}
 
@@ -88,8 +87,6 @@ func CreateTask(c buffalo.Context) error {
 		if err := c.Bind(&task); err != nil {
 			return errors.WithStack(err)
 		}
-		fmt.Println("--------------> in if", task.UserID)
-
 		verrs := task.Validate(tx)
 		if verrs.HasAny() {
 			c.Set("errors", verrs)

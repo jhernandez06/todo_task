@@ -18,6 +18,7 @@ type Fako struct {
 	LastName    string `fako:"last_name"`
 	Email       string `fako:"email_address"`
 	Description string `fako:"paragraph"`
+	Title       string `fako:"title"`
 	Priority    string `fako:"a_gen"`
 }
 
@@ -64,7 +65,7 @@ var _ = grift.Add("admins", func(c *grift.Context) error {
 		var f Fako
 		fako.Fill(&f)
 		admin := &models.User{
-			FirstName:            fmt.Sprintf("Admin %v", i+1),
+			FirstName:            f.FirstName, //fmt.Sprintf("Admin %v", i+1),
 			LastName:             f.LastName,
 			Email:                f.Email,
 			Rol:                  "admin",
@@ -89,7 +90,7 @@ var _ = grift.Add("admins", func(c *grift.Context) error {
 			x := rand.Intn(3-0) + 1
 			y := rand.Intn(3-0) + 1
 			t := &models.Task{
-				Title:        fmt.Sprintf("task %v", j+1),
+				Title:        f.Title, //fmt.Sprintf("task %v", j+1),
 				LimitData:    date(),
 				Description:  f.Description,
 				CheckComplet: checkComplet(y),

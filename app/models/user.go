@@ -23,6 +23,7 @@ type User struct {
 	PasswordHash         string    `json:"-" db:"password_hash"`
 	Password             string    `json:"-" db:"-"`
 	PasswordConfirmation string    `json:"-" db:"-"`
+	PasswordOld          string    `json:"-" db:"-"`
 	Rol                  string    `json:"rol" db:"rol"`
 	Tasks                Tasks     `has_many:"tasks" order_by:"title asc"`
 	CreatedAt            time.Time `json:"created_at" db:"created_at"`
